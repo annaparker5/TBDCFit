@@ -1,0 +1,166 @@
+---
+title: "Prelimnary Data Analysis - TBDCFitness"
+output: html_notebook
+---
+
+This notebook is to write preliminary code for data analysis for Tyler's 395 project related to the 2021 TBDCFitness experiment. 
+
+## 0. Load Packages
+
+```{r}
+library(ggplot2)
+library(lubridate)
+library(lme4)
+library(dplyr)
+```
+
+# PART I: Pod number 
+
+## 1. Load in the data
+
+```{r}
+exit <- read.csv("~/Desktop/exitdatatest3.csv")
+id <- read.csv("~/Desktop/IDtreatmenttest.csv")
+```
+
+## 2. Manipulate data
+### a. Get treatment and type into exit data
+
+```{r}
+id <- id[, 1:3]
+exit2 <- merge(exit, id, by.x = "PID", by.y = "pid")
+```
+
+### b. Get total number of pods
+
+```{r}
+exit2$num.pod.tot <- exit2$num.pod.m + exit2$num.pod.im
+```
+
+### c. Condition as a factor
+```{r}
+exit2$condition <- as.factor(exit2$condition)
+```
+
+
+## 3. Run stats
+
+```{r}
+mod1 <- lm(num.pod.tot ~ treatment*type, data = exit2)
+anova(mod1)
+```
+
+```{r}
+mod2 <- lm(num.pod.tot ~ condition*type, data = exit2)
+anova(mod2)
+```
+
+## 4. Graph! 
+
+### Number of pods vs. Treatment
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.tot)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  ylim(0, 150) + 
+  labs(x = "Treatment", y = "Total number of pods produced")
+```
+#### Broken up by plant type
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.tot)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Total number of pods produced") + 
+  facet_wrap(~type)
+```
+
+#### Just mature pods
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Number of mature pods produced") + 
+  facet_wrap(~type)
+```
+#### By condition
+
+```{r}
+ggplot(data = exit2, aes(x = condition, y = num.pod.tot)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Condition at time of exit", y = "Total number of pods produced") + 
+  facet_wrap(~type) + 
+  ylim(0,150)
+```
+
+# PART II: Herbivory
+
+## 1. Load in the data
+
+```{r}
+herb <- read.csv("~/Desktop/herbivorytest.csv")
+```
+
+## 2. Write a for loop to get out total # of leaves eaten off of each plant. 
+
+### a. Create a list of plant IDs
+
+```{r}
+ids <- id[, 1]
+```
+
+### b. Create the output file
+
+```{r}
+output <- id
+output$leaves.eaten <- NA
+```
+
+### c. Remove rows in num.leaf that say "GONE", etc. 
+
+```{r}
+herb <- herb[herb$position !="", ]
+
+```
+
+
+### d. Write the for loop 
+
+```{r}
+for(i in 1:length(ids)){
+  id.temp = ids[[i]]
+  df.temp = herb[herb$pid == id.temp, ]
+  output.temp = max(df.temp$num.leaf)
+  output[i, 4] <- output.temp
+}
+```
+
+## 3. Combine with pod data
+
+```{r}
+exitslim <- exit2[, c(1, 4, 11:13)]
+comb <- merge(exitslim, output, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
+comb$leaves.eaten <- as.numeric(comb$leaves.eaten)
+```
+
+## 4. Graph!! 
+
+### Pod number vs. leaf number
+
+```{r}
+ggplot(data = comb, aes(x = leaves.eaten, y = num.pod.tot, color = treatment)) + 
+  theme_bw() + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs(x = "Number of leaves consumed", y = "Total number of pods produced") + 
+  facet_wrap(~type)
+```
+
+
+```{r}
+
+```
+

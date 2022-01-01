@@ -1,0 +1,333 @@
+---
+title: "Prelimnary Data Analysis - TBDCFitness"
+output: html_notebook
+---
+
+This notebook is to write preliminary code for data analysis for Tyler's 395 project related to the 2021 TBDCFitness experiment. 
+
+## 0. Load Packages
+
+```{r}
+library(ggplot2)
+library(lubridate)
+library(lme4)
+library(dplyr)
+library(viridisLite)
+```
+
+# PART I: Pod number 
+
+## 1. Load in the data
+
+```{r}
+exit <- read.csv("~/Desktop/exitdatatest3.csv")
+id <- read.csv("~/Desktop/IDtreatmenttest.csv")
+```
+
+## 2. Manipulate data
+### a. Get treatment and type into exit data
+
+```{r}
+id <- id[, 1:3]
+exit2 <- merge(exit, id, by.x = "PID", by.y = "pid")
+```
+
+### b. Get total number of pods
+
+```{r}
+exit2$num.pod.tot <- exit2$num.pod.m + exit2$num.pod.im
+```
+
+### c. Condition as a factor
+```{r}
+exit2$condition <- as.factor(exit2$condition)
+```
+
+### d. Number of pods as ln (pods + 1)
+
+```{r}
+exit2$ln.num.pods.m <- log(exit2$num.pod.m + 1)
+```
+
+
+## 3. Run stats
+
+```{r}
+mod1DC <- lm(num.pod.m ~ treatment*condition, data = exit2[exit2$type == "DC", ])
+anova(mod1DC)
+```
+
+```{r}
+mod1TB <- lm(num.pod.m ~ treatment*condition, data = exit2[exit2$type == "TB", ])
+anova(mod1TB)
+```
+
+## 4. Graph! 
+
+### Number of pods vs. Treatment
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.tot)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  ylim(0, 150) + 
+  labs(x = "Treatment", y = "Total number of pods produced")
+```
+#### Broken up by plant type
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.tot)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Total number of pods produced") + 
+  facet_wrap(~type)
+```
+
+#### Just mature pods
+
+```{r}
+ggplot(data = exit2, aes(x = treatment, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Number of mature pods produced") + 
+  facet_wrap(~type)
+```
+```{r}
+ggplot(data = exit2[exit2$type == "DC", ], aes(x = treatment, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(title = "Devil's Claw", x = "Treatment", y = "Number of mature pods produced")
+```
+
+```{r}
+treatDC1 <- ggplot(data = exit2[exit2$type == "DC", ], aes(x = treatment, y = num.pod.m, color = treatment)) + 
+  theme_bw(base_size = 20) + 
+  geom_boxplot() + 
+  labs(title = "Figure 1", subtitle = "A) Devil's Claw", x = "Treatment", y = "Number of mature pods produced") + 
+  scale_color_manual(values = c("#D81B60", "orange", "lime green", "#1E88E5")) + 
+  theme(legend.position = "none")
+
+
+treatDC1
+
+ggsave("~/Desktop/treatDC1.png", plot = treatDC1, width = 8, height = 8)
+```
+
+
+```{r}
+treatDC2 <- ggplot(data = exit2[exit2$type == "DC", ], aes(x = treatment, y = ln.num.pods.m)) + 
+  theme_bw(base_size = 20) + 
+  geom_boxplot() + 
+  labs(title = "Figure 1", subtitle = "A) Devil's Claw", x = "Treatment", y = "Natural log of number of mature pods produced")
+
+treatDC2
+
+ggsave("~/Desktop/treatDC2.png", plot = treatDC2, width = 8, height = 8)
+```
+
+```{r}
+ggplot(data = exit2[exit2$type == "TB", ], aes(x = treatment, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(title = "Tobacco", x = "Treatment", y = "Number of mature pods produced")
+```
+
+
+```{r}
+treatTB1 <- ggplot(data = exit2[exit2$type == "TB", ], aes(x = treatment, y = num.pod.m, color = treatment)) + 
+  theme_bw(base_size = 20) + 
+  geom_boxplot() + 
+  labs(title = "   ", subtitle = "B) Tobacco", x = "Treatment", y = "Number of mature pods produced") + 
+  scale_color_manual(values = c("#D81B60", "orange", "lime green", "#1E88E5")) + 
+  theme(legend.position = "none")
+
+treatTB1
+
+ggsave("~/Desktop/treatTB1.png", plot = treatTB1, width = 8, height = 8)
+```
+
+
+```{r}
+treatTB2 <- ggplot(data = exit2[exit2$type == "TB", ], aes(x = treatment, y = ln.num.pods.m)) + 
+  theme_bw(base_size = 20) + 
+  geom_boxplot() + 
+  labs(title = "   ", subtitle = "B) Tobacco", x = "Treatment", y = "Natural log of number of mature pods produced")
+
+treatTB2
+
+ggsave("~/Desktop/treatTB2.png", plot = treatTB1, width = 8, height = 8)
+```
+
+
+#### By condition
+
+```{r}
+cond1 <- ggplot(data = exit2, aes(x = condition, y = num.pod.m)) + 
+  theme_bw(base_size = 20) + 
+  geom_boxplot() + 
+  labs(title = "Figure 2", x = "Condition at time of exit", y = "Number of mature pods produced") + 
+  facet_wrap(~type) + 
+  ylim(0,125)
+
+cond1
+
+ggsave("~/Desktop/Cond1.png", plot = cond1, width = 16, height = 10)
+```
+
+```{r}
+ggplot(data = exit2[exit2$type == "DC", ], aes(x = condition, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(title = "Devil's Claw", x = "Condition at time of exit", y = "Number of mature pods produced")
+```
+
+
+```{r}
+ggplot(data = exit2[exit2$type == "DC", ], aes(x = condition, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_dotplot(binaxis = "y", stackdir = "center") + 
+  labs(title = "Devil's Claw", x = "Condition at time of exit", y = "Number of mature pods produced")
+```
+
+
+
+```{r}
+ggplot(data = exit2[exit2$type == "TB", ], aes(x = condition, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(title = "Tobacco", x = "Condition at time of exit", y = "Number of mature pods produced")
+```
+
+```{r}
+ggplot(data = exit2[exit2$type == "TB", ], aes(x = condition, y = num.pod.m)) + 
+  theme_bw() + 
+  geom_dotplot(binaxis = "y", stackdir = "center") + 
+  labs(title = "Tobacco", x = "Condition at time of exit", y = "Number of mature pods produced")
+```
+
+
+# PART II: Herbivory
+
+## 1. Load in the data
+
+```{r}
+herb <- read.csv("~/Desktop/herbivorytest2.csv")
+```
+
+## 2. Write a for loop to get out total # of leaves eaten off of each plant. 
+
+### a. Create a list of plant IDs
+
+```{r}
+ids <- id[, 1]
+```
+
+### b. Create the output file
+
+```{r}
+output <- id
+output$leaves.eaten <- NA
+```
+
+### c. Remove rows in num.leaf that say "GONE", etc. 
+
+```{r}
+herb <- herb[herb$position !="", ]
+herb$num.leaf <- as.numeric(herb$num.leaf)
+
+```
+
+
+### d. Write the for loop 
+
+```{r}
+for(i in 1:length(ids)){
+  id.temp = ids[[i]]
+  df.temp = herb[herb$pid == id.temp, ]
+  output.temp = max(df.temp$num.leaf)
+  output[i, 4] <- output.temp
+}
+```
+
+```{r}
+output$leaves.eaten <- gsub("-Inf", "", output$leaves.eaten)
+```
+
+
+## 3. Combine with pod data
+
+```{r}
+exitslim <- exit2[, c(1, 4, 5, 11:13)]
+comb <- merge(exitslim, output, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
+comb$leaves.eaten <- as.numeric(comb$leaves.eaten)
+
+comb <- comb[comb$PID != 43, ]
+combtreat <- comb[comb$treatment != "CON", ]
+```
+
+## 4. Graph!! 
+
+### Pod number vs. leaf number
+
+```{r}
+ggplot(data = combtreat, aes(x = leaves.eaten, y = num.pod.m, color = treatment)) + 
+  theme_bw() + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Number of leaves consumed", y = "Number of mature pods produced") + 
+  facet_wrap(~type)
+```
+
+
+```{r}
+ggplot(data = comb, aes(x = leaves.eaten, y = num.pod.m, color = treatment)) + 
+  theme_bw() + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Number of leaves consumed", y = "Total number of pods produced") + 
+  facet_wrap(~type)
+```
+
+```{r}
+herbDC1 <- ggplot(data = combtreat[combtreat$type == "DC", ], 
+                  aes(x = leaves.eaten, y = num.pod.m, color = treatment)) + 
+  theme_bw(base_size = 20) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(title = "Figure 2", subtitle = "A) Devil's Claw", x = "Number of leaves consumed", 
+       y = "Number of mature pods produced") + 
+  scale_color_manual(values = c("orange", "lime green", "#1E88E5"))
+
+herbDC1
+
+ggsave("~/Desktop/herbDC1.png", plot = herbDC1, width = 8, height = 10)
+```
+
+```{r}
+herbTB1 <- ggplot(data = combtreat[combtreat$type == "TB", ], 
+                  aes(x = leaves.eaten, y = num.pod.m, color = treatment)) + 
+  theme_bw(base_size = 20) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(title = "   ", subtitle = "B) Tobacco", x = "Number of leaves consumed", y = "Number of mature pods produced") + 
+  ylim(0, 200) + 
+  scale_color_manual(values = c("orange", "lime green", "#1E88E5"))
+
+herbTB1
+
+ggsave("~/Desktop/herbTB1.png", plot = herbTB1, width = 8, height = 10)
+```
+
+
+```{r}
+modjoel1 <- lm(ln.num.pods.m ~ treatment + type + leaves.eaten, data  =  comb)
+
+anova(modjoel1)
+```
+
+```{r}
+modjoel2 <- lm(num.pod.m ~ treatment + type + leaves.eaten, data  =  comb)
+
+anova(modjoel2)
+```
+
