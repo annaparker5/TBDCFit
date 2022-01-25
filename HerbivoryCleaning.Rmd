@@ -1,0 +1,99 @@
+---
+title: "Herbivory Cleaning and Analysis"
+output: html_notebook
+---
+
+This document cleans the herbivory dataset to get maximum herbivory data for each plant. 
+
+Steps: 
+0. Load packages and the dataset
+1. Subset the data for each plant
+2. Determine whether the WOWEs were WOWEs or WOWE mongos, and how to count their consumed leaves as such 
+3. Determine whether each plant had a caterpillar go to completion, and remove the ones that didn't 
+4. Fix the data so we have one value per plant, to graph and analyze for Tyler
+5. Remake the graphs and do the analyses
+
+**I decided to do steps 2-4 in Excel, to make a new dataset in an easier fashion than adding row-by-row in R**
+
+# 0. Load in the packages and dataset
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/herbivory.csv", header = TRUE)
+```
+
+# 1. Subset the data for each plant
+
+```{r}
+PIDs <- unique(herb$pid)
+for(i in 1:length(PIDs)) {
+  subset <- herb[herb$pid == PIDs[[i]], ]
+  print(subset)
+}
+```
+
+# 2-4. Load in the new fixed dataset
+
+```{r}
+herbc <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
+```
+
+# 5. Remake the graphs and do the analyses
+
+## Complete development only
+
+
+```{r}
+herbcomp <- herbc[herbc$dev.complete == "yes", ]
+herbcomp <- herbcomp[herbcomp$treatment != "CON", ]
+```
+
+### Stats - leaf number differ by treatment?
+
+```{r}
+leafnumDC <- lm(num.leaf ~ treatment, data = herbcomp[herbcomp$type == "DC", ])
+
+summary(leafnumDC)
+```
+
+
+```{r}
+leafnumTB <- lm(num.leaf ~ treatment, data = herbcomp[herbcomp$type == "TB", ])
+
+summary(leafnumTB)
+```
+
+In both DC and TB, WEs eat less than WOWEs or WANDs, but the other two are indistinguishable. 
+
+### Graphs - leaf num by mature pod num 
+
+```{r}
+poddata <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+```
+
+Add pod data to leaf dataset
+
+```{r}
+comb <- merge(herbc, poddata, by.x = "pid", by.y = "PID")
+```
+
+```{r}
+ggplot(comb[comb$treatment != "CON", ], aes(x = num.leaf, y = num.pod.m, color = treatment)) + 
+  theme_bw() + 
+  facet_wrap(facets = "type") + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+```{r}
+ggplot(comb[comb$treatment != "CON", ], aes(x = num.leaf, y = num.pod.m + num.pod.im, color = treatment)) + 
+  theme_bw() + 
+  facet_wrap(facets = "type") + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+```
