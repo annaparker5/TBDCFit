@@ -1,0 +1,186 @@
+---
+title: "figures and Stats for Honors Thesis"
+output: html_notebook
+---
+
+This notebook will make the figures and run the stats for Tyler's Honors Thesis. 
+
+## 0. Load libraries and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
+pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+```
+
+## 1. Clean the data
+
+Remove the individuals that had mature pods that we couldn't measure due to damage/mold
+
+```{r}
+TBseed <- TBseed[TBseed$pid != 23, ]
+TBseed <- TBseed[TBseed$pid != 141, ]
+```
+
+```{r}
+pods <- pods[pods$PID != 23, ]
+pods <- pods[pods$PID != 141, ]
+```
+
+Remove unneeded rows from TBseed and pods
+
+```{r}
+TBseed <- TBseed %>%
+  select(pid, mature, kept, pod.avg)
+```
+
+```{r}
+pods <- pods %>%
+  select(PID, num.pod.m)
+```
+
+Merge datasets into master dataset
+
+```{r}
+comb <- merge(herb, pods, by.x = "pid", by.y = "PID")
+comb <- merge(comb, TBseed, by = "pid", all.x = TRUE)
+```
+
+Get seed resources per pod calculation
+
+Tobacco: mass of each pod
+DC: num seeds per pod (avg)
+
+Get total reproductive output
+
+Tobacco: avg mass * num mature pods
+DC: avg num seeds * num mature pods
+
+```{r}
+comb$repro <- comb$num.pod.m * comb$pod.avg
+```
+
+Get zeros in reproductive output with no mature pods
+
+```{r}
+comb$repro[is.na(comb$repro)] <- 0
+comb <- mutate_at(comb$repro, ~replace(., is.na(.), 0))
+```
+
+
+## 2. Make figures!!
+
+### Fig. 1: Methods Figure
+
+### Fig. 2: Number of leaves consumed across treatment groups
+
+Only individuals that completed development
+
+```{r}
+fig2DC <- ggplot(data = comb[comb$type == "DC" & comb$dev.complete == "yes", ], 
+                 aes(treatment, num.leaf)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1, alpha = 0.5) + 
+  labs(x = "Treatment Group", y = "Number of leaves consumed", title = "A) Devil's Claw")
+
+fig2DC
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig2DC.png", plot = fig2DC, width = 8, height = 5)
+```
+
+
+```{r}
+fig2TB <- ggplot(data = comb[comb$type == "TB" & comb$dev.complete == "yes", ], 
+                 aes(treatment, num.leaf)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1, alpha = 0.5) + 
+  labs(x = "Treatment Group", y = "Number of leaves consumed", title = "B) Tobacco")
+
+fig2TB
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig2TB.png", plot = fig2TB, width = 8, height = 5)
+```
+
+### Fig. 3: Seed resources per pod across trt groups 
+
+```{r}
+fig3DC
+```
+
+```{r}
+fig3TB <- ggplot(data = comb[comb$type == "TB" & comb$dev.complete == "yes", ], 
+                 aes(x = treatment, y = pod.avg)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1, alpha = 0.5) + 
+  labs(x = "Treatment Group", y = "Average mass of seedpod", title = "B) Tobacco")
+
+fig3TB
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TB.png", plot = fig3TB, width = 8, height = 5)
+```
+
+
+### Fig. 4: total realized reproductive output vs. herbivory
+
+```{r}
+fig4DC
+```
+
+
+```{r}
+fig4TB <- ggplot(data = comb[comb$type == "TB", ], 
+                 aes(x = num.leaf, y = repro, color = treatment)) + 
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Number of leaves consumed", y = "Total reproductive output (mg of seeds)", title = "B) Tobacco", 
+       color = "Treatment")
+
+fig4TB
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig4TB.png", plot = fig4TB, width = 8, height = 5)
+```
+
+
+
+## Statistics: 
+
+### ANOVA for Fig. 2
+
+```{r}
+leafDC <- lm(num.leaf ~ treatment, 
+             data = comb[comb$type == "DC" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
+
+anova(leafDC)
+```
+
+
+```{r}
+leafTB <- lm(num.leaf ~ treatment, 
+             data = comb[comb$type == "TB" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
+
+anova(leafTB)
+```
+
+### ANOVA for Fig. 3
+
+```{r}
+podTB <- lm(pod.avg ~ treatment, 
+            data = comb[comb$type == "TB" & comb$dev.complete == "yes", ])
+
+anova(podTB)
+```
+
+### LM for Fig. 4
+
+```{r}
+reproTB <- lm(repro ~ num.leaf, data = comb[comb$type == "TB", ])
+
+summary(reproTB)
+```
+
+
+

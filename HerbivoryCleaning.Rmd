@@ -58,6 +58,7 @@ herbcomp <- herbcomp[herbcomp$treatment != "CON", ]
 leafnumDC <- lm(num.leaf ~ treatment, data = herbcomp[herbcomp$type == "DC", ])
 
 summary(leafnumDC)
+anova(leafnumDC)
 ```
 
 
@@ -65,6 +66,7 @@ summary(leafnumDC)
 leafnumTB <- lm(num.leaf ~ treatment, data = herbcomp[herbcomp$type == "TB", ])
 
 summary(leafnumTB)
+anova(leafnumTB)
 ```
 
 In both DC and TB, WEs eat less than WOWEs or WANDs, but the other two are indistinguishable. 
