@@ -120,42 +120,23 @@ fig2TB
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig2TB.png", plot = fig2TB, width = 8, height = 5)
 ```
 
-### Fig. 3: Seed resources per pod across trt groups 
+### Fig. 3: total realized reproductive output vs. herbivory
 
 ```{r}
-fig3DC
-```
-
-```{r}
-fig3TB <- ggplot(data = comb[comb$type == "TB" & comb$dev.complete == "yes", ], 
-                 aes(x = treatment, y = pod.avg)) + 
-  theme_bw() + 
-  geom_boxplot() + 
-  geom_jitter(width = 0.1, alpha = 0.5) + 
-  labs(x = "Treatment Group", y = "Average mass of seedpod", title = "B) Tobacco")
-
-fig3TB
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TB.png", plot = fig3TB, width = 8, height = 5)
-```
-
-
-### Fig. 4: total realized reproductive output vs. herbivory
-
-```{r}
-fig4DC
+fig3DCnew
 ```
 
 
 ```{r}
-fig4TB <- ggplot(data = comb[comb$type == "TB", ], 
-                 aes(x = num.leaf, y = repro, color = treatment)) + 
+fig3TBnew <- ggplot(data = comb[comb$type == "TB", ], 
+                 aes(x = num.leaf, y = repro/1000, color = treatment)) + 
   theme_bw() + 
   geom_point() + 
-  labs(x = "Number of leaves consumed", y = "Total reproductive output (mg of seeds)", title = "B) Tobacco", 
+  labs(x = "Number of leaves consumed", y = "Total reproductive output (g of seeds)", title = "B) Tobacco", 
        color = "Treatment")
 
-fig4TB
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig4TB.png", plot = fig4TB, width = 8, height = 5)
+fig3TBnew
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TBnew.png", plot = fig3TBnew, width = 8, height = 5)
 ```
 
 
@@ -180,24 +161,16 @@ summary(leafTB)
 anova(leafTB)
 ```
 
-### ANOVA for Fig. 3
-
-```{r}
-podTB <- lmer(pod.avg ~ treatment + (1|column), 
-            data = comb[comb$type == "TB" & comb$dev.complete == "yes", ])
-
-summary(podTB)
-
-anova(podTB)
-```
-
-### LM for Fig. 4
+### LM for Fig. 3 new
 
 ```{r}
 reproTB <- lmer(repro ~ num.leaf + (1|column), data = comb[comb$type == "TB", ])
 
 summary(reproTB)
+
 ```
+
+### Checking some stuff
 
 ```{r}
 reproTB2 <- lmer(repro ~ treatment + (1|column), data = comb[comb$type == "TB", ])
