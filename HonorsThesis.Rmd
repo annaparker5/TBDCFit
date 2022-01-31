@@ -10,6 +10,7 @@ This notebook will make the figures and run the stats for Tyler's Honors Thesis.
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(lmerTest)
 ```
 
 ```{r}
@@ -69,8 +70,21 @@ Get zeros in reproductive output with no mature pods
 
 ```{r}
 comb$repro[is.na(comb$repro)] <- 0
-comb <- mutate_at(comb$repro, ~replace(., is.na(.), 0))
+#comb <- mutate_at(comb$repro, ~replace(., is.na(.), 0))
 ```
+
+Add column to the datatable
+
+```{r}
+key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+
+key <- key %>%
+  select(pid, column)
+
+comb <- merge(comb, key, by = "pid")
+```
+
+
 
 
 ## 2. Make figures!!
@@ -151,25 +165,28 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig4TB.png", plot = fig4TB, width = 8, 
 ### ANOVA for Fig. 2
 
 ```{r}
-leafDC <- lm(num.leaf ~ treatment, 
+leafDC <- lmer(num.leaf ~ treatment + (1|column), 
              data = comb[comb$type == "DC" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
 
-anova(leafDC)
+summary(leafDC)
 ```
 
 
 ```{r}
-leafTB <- lm(num.leaf ~ treatment, 
+leafTB <- lmer(num.leaf ~ treatment + (1|column), 
              data = comb[comb$type == "TB" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
 
+summary(leafTB)
 anova(leafTB)
 ```
 
 ### ANOVA for Fig. 3
 
 ```{r}
-podTB <- lm(pod.avg ~ treatment, 
+podTB <- lmer(pod.avg ~ treatment + (1|column), 
             data = comb[comb$type == "TB" & comb$dev.complete == "yes", ])
+
+summary(podTB)
 
 anova(podTB)
 ```
@@ -177,10 +194,28 @@ anova(podTB)
 ### LM for Fig. 4
 
 ```{r}
-reproTB <- lm(repro ~ num.leaf, data = comb[comb$type == "TB", ])
+reproTB <- lmer(repro ~ num.leaf + (1|column), data = comb[comb$type == "TB", ])
 
 summary(reproTB)
 ```
 
+```{r}
+reproTB2 <- lmer(repro ~ treatment + (1|column), data = comb[comb$type == "TB", ])
 
+anova(reproTB2)
+```
+
+```{r}
+columnTB <- lm(repro ~ column, data = comb[comb$type == "TB", ])
+
+anova(columnTB)
+```
+
+
+```{r}
+checkTB <- lm(repro ~ column*treatment, data = comb[comb$type == "TB", ])
+
+anova(checkTB)
+```
+DF too high 
 
