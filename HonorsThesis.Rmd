@@ -180,9 +180,29 @@ anova(reproTB2)
 
 ```{r}
 columnTB <- lm(repro ~ column, data = comb[comb$type == "TB", ])
+#take residuals of this model and have it be the response variable 
 
 anova(columnTB)
+
+
+combTB <- comb[comb$type == "TB", ]
+
+combTB$residuals <- columnTB$residuals
+
+resid <- lm(residuals ~ num.leaf, data = combTB)
+
+anova(resid)
+
 ```
+
+```{r}
+ggplot(comb[comb$type == "TB", ], aes(x = column, y = repro)) + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1) + 
+  ylim(0, 25000)
+```
+
+
 
 
 ```{r}
