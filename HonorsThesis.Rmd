@@ -191,15 +191,16 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TBln.png", plot = fig3TBln, width =
 ### ANOVA for Fig. 2
 
 ```{r}
-leafDC <- lmer(num.leaf ~ treatment + (1|column), 
+leafDC <- lm(num.leaf ~ treatment, 
              data = combDC[combDC$treatment != "CON" & combDC$dev.complete == "yes", ])
 
 summary(leafDC)
+anova(leafDC)
 ```
 
 
 ```{r}
-leafTB <- lmer(num.leaf ~ treatment + (1|column), 
+leafTB <- lm(num.leaf ~ treatment, 
              data = combTB[combTB$treatment != "CON" & combTB$dev.complete == "yes", ])
 
 summary(leafTB)
