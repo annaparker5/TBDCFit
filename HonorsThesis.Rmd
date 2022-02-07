@@ -17,6 +17,7 @@ library(lmerTest)
 herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
 pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
 TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
 ```
 
 ## 1. Clean the data
@@ -45,11 +46,37 @@ pods <- pods %>%
   select(PID, num.pod.m)
 ```
 
+### Write a for loop to get avg seed number per pod for DC
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(DCseed$pid)
+
+#2. Make output dataset
+
+DCseedout <- data.frame(pid = DCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- DCseed[DCseed$pid == DCpid[i], ]
+  DCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
 Merge datasets into master dataset
 
 ```{r}
 comb <- merge(herb, pods, by.x = "pid", by.y = "PID")
-comb <- merge(comb, TBseed, by = "pid", all.x = TRUE)
+
+combTB <- comb[comb$type == "TB", ]
+
+combDC <- comb[comb$type == "DC", ]
+
+combTB <- merge(combTB, TBseed, by = "pid", all.x = TRUE)
+combDC <- merge(combDC, DCseedout, by = "pid", all.x = TRUE)
 ```
 
 Get seed resources per pod calculation
@@ -63,13 +90,15 @@ Tobacco: avg mass * num mature pods
 DC: avg num seeds * num mature pods
 
 ```{r}
-comb$repro <- comb$num.pod.m * comb$pod.avg
+combTB$repro <- combTB$num.pod.m * combTB$pod.avg
+combDC$repro <- combDC$num.pod.m * combDC$pod.avg
 ```
 
 Get zeros in reproductive output with no mature pods
 
 ```{r}
-comb$repro[is.na(comb$repro)] <- 0
+combTB$repro[is.na(combTB$repro)] <- 0
+combDC$repro[is.na(combDC$repro)] <- 0
 #comb <- mutate_at(comb$repro, ~replace(., is.na(.), 0))
 ```
 
@@ -81,9 +110,16 @@ key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
 key <- key %>%
   select(pid, column)
 
-comb <- merge(comb, key, by = "pid")
+combTB <- merge(combTB, key, by = "pid")
+combDC <- merge(combDC, key, by = "pid")
 ```
 
+Add log-scaled repro output
+
+```{r}
+combTB$logrepro <- log(combTB$repro + 1)
+combDC$logrepro <- log(combDC$repro + 1)
+```
 
 
 
@@ -96,7 +132,7 @@ comb <- merge(comb, key, by = "pid")
 Only individuals that completed development
 
 ```{r}
-fig2DC <- ggplot(data = comb[comb$type == "DC" & comb$dev.complete == "yes", ], 
+fig2DC <- ggplot(data = combDC[combDC$dev.complete == "yes", ], 
                  aes(treatment, num.leaf)) + 
   theme_bw() + 
   geom_boxplot() + 
@@ -109,7 +145,7 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig2DC.png", plot = fig2DC, width = 8, 
 
 
 ```{r}
-fig2TB <- ggplot(data = comb[comb$type == "TB" & comb$dev.complete == "yes", ], 
+fig2TB <- ggplot(data = combTB[combTB$dev.complete == "yes", ], 
                  aes(treatment, num.leaf)) + 
   theme_bw() + 
   geom_boxplot() + 
@@ -123,20 +159,29 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig2TB.png", plot = fig2TB, width = 8, 
 ### Fig. 3: total realized reproductive output vs. herbivory
 
 ```{r}
-fig3DCnew
+fig3DCln <- ggplot(data = combDC, 
+                 aes(x = num.leaf, y = logrepro, color = treatment)) + 
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Number of leaves consumed", y = "Total reproductive output (ln(number of seeds))", title = "A) Devil's claw", 
+       color = "Treatment")
+
+fig3DCln
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3DCln.png", plot = fig3DCln, width = 8, height = 5)
 ```
 
 
 ```{r}
-fig3TBnew <- ggplot(data = comb[comb$type == "TB", ], 
-                 aes(x = num.leaf, y = repro/1000, color = treatment)) + 
+fig3TBln <- ggplot(data = combTB, 
+                 aes(x = num.leaf, y = logrepro, color = treatment)) + 
   theme_bw() + 
   geom_point() + 
-  labs(x = "Number of leaves consumed", y = "Total reproductive output (g of seeds)", title = "B) Tobacco", 
+  labs(x = "Number of leaves consumed", y = "Total reproductive output (ln(mg of seeds))", title = "B) Tobacco", 
        color = "Treatment")
 
-fig3TBnew
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TBnew.png", plot = fig3TBnew, width = 8, height = 5)
+fig3TBln
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TBln.png", plot = fig3TBln, width = 8, height = 5)
 ```
 
 
@@ -147,7 +192,7 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fig3TBnew.png", plot = fig3TBnew, width
 
 ```{r}
 leafDC <- lmer(num.leaf ~ treatment + (1|column), 
-             data = comb[comb$type == "DC" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
+             data = combDC[combDC$treatment != "CON" & combDC$dev.complete == "yes", ])
 
 summary(leafDC)
 ```
@@ -155,7 +200,7 @@ summary(leafDC)
 
 ```{r}
 leafTB <- lmer(num.leaf ~ treatment + (1|column), 
-             data = comb[comb$type == "TB" & comb$treatment != "CON" & comb$dev.complete == "yes", ])
+             data = combTB[combTB$treatment != "CON" & combTB$dev.complete == "yes", ])
 
 summary(leafTB)
 anova(leafTB)
@@ -163,35 +208,19 @@ anova(leafTB)
 
 ### LM for Fig. 3 new
 
-```{r}
-reproTB <- lmer(repro ~ num.leaf + (1|column), data = comb[comb$type == "TB", ])
-
-summary(reproTB)
-
-```
-
 ### Checking some stuff
 
 ```{r}
-reproTB2 <- lmer(repro ~ treatment + (1|column), data = comb[comb$type == "TB", ])
-
-anova(reproTB2)
-```
-
-```{r}
-columnTB <- lm(repro ~ column, data = comb[comb$type == "TB", ])
+columnTB <- lm(repro ~ column, data = combTB)
 #take residuals of this model and have it be the response variable 
 
 anova(columnTB)
 
-
-combTB <- comb[comb$type == "TB", ]
-
 combTB$residuals <- columnTB$residuals
 
-resid <- lm(residuals ~ num.leaf, data = combTB)
+residTB <- lm(residuals ~ num.leaf, data = combTB)
 
-anova(resid)
+anova(residTB)
 
 ```
 
@@ -203,12 +232,25 @@ ggplot(comb[comb$type == "TB", ], aes(x = column, y = repro)) +
 ```
 
 
+```{r}
+columnDC <- lm(repro ~ column, data = combDC)
+#take residuals of this model and have it be the response variable 
+
+anova(columnDC)
+
+combDC$residuals <- columnDC$residuals
+
+residDC <- lm(residuals ~ num.leaf, data = combDC)
+
+anova(residDC)
+
+```
 
 
 ```{r}
-checkTB <- lm(repro ~ column*treatment, data = comb[comb$type == "TB", ])
-
-anova(checkTB)
+ggplot(combDC, aes(x = column, y = repro)) + 
+  geom_boxplot() + 
+  geom_jitter(width = 0.1) + 
+  ylim(0, 1000)
 ```
-DF too high 
 
