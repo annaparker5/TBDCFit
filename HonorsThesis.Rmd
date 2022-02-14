@@ -220,16 +220,20 @@ anova(columnTB)
 combTB$residuals <- columnTB$residuals
 
 residTB <- lm(residuals ~ num.leaf, data = combTB)
+trtTB <- lm(residuals ~ treatment, data = combTB)
 
 anova(residTB)
+anova(trtTB)
 
 ```
 
 ```{r}
-ggplot(comb[comb$type == "TB", ], aes(x = column, y = repro)) + 
+ggplot(combTB, aes(x = column, y = repro)) + 
+  theme_bw() + 
   geom_boxplot() + 
   geom_jitter(width = 0.1) + 
-  ylim(0, 25000)
+  ylim(0, 25000) + 
+  labs(x = "Column in Field Plot", y = "Total Reproductive Output (mass of seedpods (mg))", title = "B) Tobacco")
 ```
 
 
@@ -250,8 +254,10 @@ anova(residDC)
 
 ```{r}
 ggplot(combDC, aes(x = column, y = repro)) + 
+  theme_bw() + 
   geom_boxplot() + 
   geom_jitter(width = 0.1) + 
-  ylim(0, 1000)
+  ylim(0, 1000) + 
+  labs(x = "Column of Field Plot", y = "Total Reproductive Output (number of seeds)", title = "A) Devil's Claw")
 ```
 
