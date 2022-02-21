@@ -163,6 +163,7 @@ fig3DCln <- ggplot(data = combDC,
                  aes(x = num.leaf, y = logrepro, color = treatment)) + 
   theme_bw() + 
   geom_point() + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   labs(x = "Number of leaves consumed", y = "Total reproductive output (ln(number of seeds))", title = "A) Devil's claw", 
        color = "Treatment")
 
@@ -177,6 +178,7 @@ fig3TBln <- ggplot(data = combTB,
                  aes(x = num.leaf, y = logrepro, color = treatment)) + 
   theme_bw() + 
   geom_point() + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   labs(x = "Number of leaves consumed", y = "Total reproductive output (ln(mg of seeds))", title = "B) Tobacco", 
        color = "Treatment")
 
