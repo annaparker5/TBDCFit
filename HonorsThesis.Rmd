@@ -245,6 +245,7 @@ fieldTB <- ggplot(combTB, aes(x = column, y = repro)) +
   ylim(0, 25000) + 
   labs(x = "Column in Field Plot", y = "Total Reproductive Output (mass of seedpods (mg))", title = "B) Tobacco")
 
+fieldTB
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/SuppFigTB.png", fieldTB, width = 8, height = 5)
 ```
 
@@ -271,6 +272,8 @@ fieldDC <- ggplot(combDC, aes(x = column, y = repro)) +
   geom_jitter(width = 0.1) + 
   ylim(0, 1000) + 
   labs(x = "Column of Field Plot", y = "Total Reproductive Output (number of seeds)", title = "A) Devil's Claw")
+
+fieldDC
 
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/SuppFigDC.png", fieldDC, width = 8, height = 5)
 ```
