@@ -234,6 +234,7 @@ residTB <- lm(residuals ~ num.leaf, data = combTB)
 trtTB <- lm(residuals ~ treatment, data = combTB)
 
 anova(residTB)
+anova(trtTB)
 
 ```
 
@@ -259,8 +260,10 @@ anova(columnDC)
 combDC$residuals <- columnDC$residuals
 
 residDC <- lm(residuals ~ num.leaf, data = combDC)
+trtDC <- lm(residuals ~ treatment, data = combDC)
 
 anova(residDC)
+anova(trtDC)
 
 ```
 
