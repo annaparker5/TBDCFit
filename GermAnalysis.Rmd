@@ -8,7 +8,7 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 library(ggplot2)
-library(lmerTest)
+library(lme4)
 ```
 
 ```{r}
@@ -44,8 +44,105 @@ comb <- merge(comb, key, by = "pid")
 Column by germination success
 
 ```{r}
-colgerm <- glmer(prop.sprouted ~ column + (1|flat), data = comb, family = binomial, weights = num.seeds )
+colgerm <- glmer(prop.sprouted ~ column + (1|flat), data = comb, family = binomial, weights = num.seeds)
+
+summary(colgerm)
+anova(colgerm, test = "Chisq")
 ```
+
+Germination success by treatment
+
+```{r}
+treatgerm <- glmer(prop.sprouted ~ treatment + (1|flat), data = comb, family = binomial, weights = num.seeds)
+
+summary(treatgerm)
+anova(treatgerm, test = "Chisq")
+```
+
+DC only:
+```{r}
+treatgermDC <- glmer(prop.sprouted ~ treatment + (1|flat), data = comb[comb$type == "DC", ], family = binomial, weights = num.seeds)
+
+summary(treatgermDC)
+anova(treatgermDC, test = "Chisq")
+```
+
+
+TB only:
+```{r}
+treatgermTB <- glmer(prop.sprouted ~ treatment + (1|flat), data = comb[comb$type == "TB", ], family = binomial, weights = num.seeds)
+
+summary(treatgermTB)
+anova(treatgermTB, test = "Chisq")
+```
+
+
+Herbivory vs. germination success
+
+DC:
+
+```{r}
+herbDCgerm <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb[comb$type == "DC", ], family = binomial, weights = num.seeds)
+
+summary(herbDCgerm)
+```
+
+TB: 
+
+```{r}
+herbTBgerm <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb[comb$type == "TB", ], family = binomial, weights = num.seeds)
+
+summary(herbTBgerm)
+```
+
+
+
+## Try doing it without moldy DC seeds 
+
+```{r}
+comb2 <- comb[comb$num.seeds >= 10, ]
+```
+
+Germination success by treatment
+
+```{r}
+treatgerm2 <- glmer(prop.sprouted ~ treatment + (1|flat), data = comb2, family = binomial, weights = num.seeds)
+
+summary(treatgerm2)
+#anova(treatgerm, test = "Chisq")
+```
+
+```{r}
+treattypegerm <- glmer(prop.sprouted ~ treatment + type + (1|flat), data = comb2, family = binomial, weights = num.seeds)
+
+summary(treattypegerm)
+```
+
+Don't want this one (interaction not significant)
+```{r}
+treattypegerm2 <- glmer(prop.sprouted ~ treatment*type + (1|flat), data = comb2, family = binomial, weights = num.seeds)
+
+summary(treattypegerm2)
+anova(treattypegerm2)
+```
+
+
+Herbivory by germ 
+
+```{r}
+herbgermDC2 <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb2[comb2$type == "DC", ], family = binomial, weights = num.seeds)
+
+summary(herbgermDC2)
+```
+
+
+```{r}
+herbgermTB2 <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb2[comb2$type == "TB", ], family = binomial, weights = num.seeds)
+
+summary(herbgermTB2)
+```
+
+
 
 
 
