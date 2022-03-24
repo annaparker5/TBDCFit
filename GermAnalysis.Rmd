@@ -135,6 +135,16 @@ herbgermDC2 <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb2[comb2$ty
 summary(herbgermDC2)
 ```
 
+```{r}
+ggplot(aes(x = num.leaf, y = prop.sprouted, color = treatment), data = comb2[comb2$type == "DC", ]) + 
+  theme_bw() + 
+  geom_point() + 
+ # geom_smooth(method = "lm") + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  labs(x = "Number of leaves consumed", y = "Proportion of seeds sprouted", title = "A) Devil's claw")
+```
+
+
 
 ```{r}
 herbgermTB2 <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb2[comb2$type == "TB", ], family = binomial, weights = num.seeds)
@@ -142,6 +152,14 @@ herbgermTB2 <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = comb2[comb2$ty
 summary(herbgermTB2)
 ```
 
+```{r}
+ggplot(aes(x = num.leaf, y = prop.sprouted, color = treatment), data = comb2[comb2$type == "TB", ]) + 
+  theme_bw() + 
+  geom_point() + 
+  #geom_smooth(method = "lm") + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  labs(x = "Number of leaves consumed", y = "Proportion of seeds sprouted", title = "B) Tobacco")
+```
 
 
 
