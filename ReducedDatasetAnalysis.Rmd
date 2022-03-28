@@ -1,0 +1,268 @@
+---
+title: "Reduced Dataset Analyses"
+output: html_notebook
+---
+
+After discussing with my committee on 3/24/22, they suggested only analyzing the plants from columns of "good" quality, and removing the first few columns from the dataset. After discussion with Tyler, we agreed to exclude columns A-F and reanalyze all of the data to observe what trends emerged. 
+
+
+## 0. Load libraries and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(lmerTest)
+library(lme4)
+```
+
+
+```{r}
+herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
+pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
+germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
+```
+
+
+## 1. Clean the data
+
+Remove the individuals that had mature pods that we couldn't measure due to damage/mold
+
+```{r}
+TBseed <- TBseed[TBseed$pid != 23, ]
+TBseed <- TBseed[TBseed$pid != 141, ]
+```
+
+```{r}
+pods <- pods[pods$PID != 23, ]
+pods <- pods[pods$PID != 141, ]
+```
+
+Remove unneeded rows from TBseed and pods
+
+```{r}
+TBseed <- TBseed %>%
+  select(pid, mature, kept, pod.avg)
+```
+
+```{r}
+pods <- pods %>%
+  select(PID, num.pod.m)
+```
+
+### Write a for loop to get avg seed number per pod for DC
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(DCseed$pid)
+
+#2. Make output dataset
+
+DCseedout <- data.frame(pid = DCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- DCseed[DCseed$pid == DCpid[i], ]
+  DCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
+Merge datasets into master dataset
+
+```{r}
+comb <- merge(herb, pods, by.x = "pid", by.y = "PID")
+
+combTB <- comb[comb$type == "TB", ]
+
+combDC <- comb[comb$type == "DC", ]
+
+combTB <- merge(combTB, TBseed, by = "pid", all.x = TRUE)
+combDC <- merge(combDC, DCseedout, by = "pid", all.x = TRUE)
+```
+
+### Remove DC where we couldn't find pods / pods rotten
+
+```{r}
+combDC <- combDC[combDC$pid != 78, ]
+combDC <- combDC[combDC$pid != 140, ]
+```
+
+
+
+Get seed resources per pod calculation
+
+Tobacco: mass of each pod
+DC: num seeds per pod (avg)
+
+Get total reproductive output
+
+Tobacco: avg mass * num mature pods
+DC: avg num seeds * num mature pods
+
+```{r}
+combTB$repro <- combTB$num.pod.m * combTB$pod.avg
+combDC$repro <- combDC$num.pod.m * combDC$pod.avg
+```
+
+Get zeros in reproductive output with no mature pods
+
+```{r}
+combTB$repro[is.na(combTB$repro)] <- 0
+combDC$repro[is.na(combDC$repro)] <- 0
+#comb <- mutate_at(comb$repro, ~replace(., is.na(.), 0))
+```
+
+### Add column to the datatable
+
+```{r}
+key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+
+key <- key %>%
+  select(pid, column)
+
+combTB <- merge(combTB, key, by = "pid")
+combDC <- merge(combDC, key, by = "pid")
+```
+
+### Add log-scaled repro output
+
+```{r}
+combTB$logrepro <- log(combTB$repro + 1)
+combDC$logrepro <- log(combDC$repro + 1)
+```
+
+### Remove columns A-F from both datasets
+
+```{r}
+combTB2 <- combTB[!(combTB$column == "A" | combTB$column == "B" | combTB$column == "C" | combTB$column == "D" | 
+                   combTB$column == "E" | combTB$column == "F" | combTB$column == "C "), ]
+
+combDC2 <- combDC[!(combDC$column == "A" | combDC$column == "B" | combDC$column == "C" | combDC$column == "D" | 
+                   combDC$column == "E" | combDC$column == "F"), ]
+```
+
+### Add germination data
+
+```{r}
+germ <- germ %>%
+  select(pid, flat, num.seeds, prop.sprouted)
+
+combTBgerm <- merge(combTB2, germ, by = "pid")
+combDCgerm <- merge(combDC2, germ, by = "pid")
+```
+
+## 2. Run analyses 
+
+### Leaf number consumed across treatment groups - SIGNIFICANT
+
+```{r}
+leafDC <- lm(num.leaf ~ treatment, 
+             data = combDC2[combDC2$treatment != "CON" & combDC2$dev.complete == "yes", ])
+
+summary(leafDC)
+anova(leafDC)
+```
+
+```{r}
+leafTB <- lm(num.leaf ~ treatment, 
+             data = combTB2[combTB2$treatment != "CON" & combTB2$dev.complete == "yes", ])
+
+summary(leafTB)
+anova(leafTB)
+```
+
+### Number of pods vs. herbivory and treatment group - NOT SIGNIFICANT
+
+```{r}
+podherbDC <- lm(num.pod.m ~ num.leaf, data = combDC2)
+
+summary(podherbDC)
+anova(podherbDC)
+```
+
+
+```{r}
+podherbTB <- lm(num.pod.m ~ num.leaf, data = combTB2)
+
+summary(podherbTB)
+anova(podherbTB)
+```
+
+```{r}
+podtrtDC <- lm(num.pod.m ~ treatment, data = combDC2)
+
+summary(podtrtDC)
+anova(podtrtDC)
+```
+
+
+```{r}
+podtrtTB <- lm(num.pod.m ~ treatment, data = combTB2)
+
+summary(podtrtTB)
+anova(podtrtTB)
+```
+
+### Seed set vs. herbivory and treatment - NOT SIGNIFICANT
+
+```{r}
+reproDC <- lm(repro ~ num.leaf, data = combDC2)
+
+summary(reproDC)
+anova(reproDC)
+```
+
+```{r}
+reproTB <- lm(repro ~ num.leaf, data = combTB2)
+
+summary(reproTB)
+anova(reproTB)
+```
+
+```{r}
+reprotrtDC <- lm(repro ~ treatment, data = combDC2)
+
+summary(reprotrtDC)
+anova(reprotrtDC)
+```
+
+```{r}
+reprotrtTB <- lm(repro ~ treatment, data = combTB2)
+
+summary(reprotrtTB)
+anova(reprotrtTB)
+```
+
+### Germination success vs. herbivory and treatment - NOT SIGNIFICANT
+
+```{r}
+germherbDC <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = combDCgerm, family = binomial, weights = num.seeds)
+
+summary(germherbDC)
+```
+
+```{r}
+germherbTB <-  glmer(prop.sprouted ~ num.leaf + (1|flat), data = combTBgerm, family = binomial, weights = num.seeds)
+
+summary(germherbTB)
+```
+
+
+
+```{r}
+germtrtDC <-  glmer(prop.sprouted ~ treatment + (1|flat), data = combDCgerm, family = binomial, weights = num.seeds)
+
+summary(germtrtDC)
+```
+
+
+```{r}
+germtrtTB <-  glmer(prop.sprouted ~ treatment + (1|flat), data = combTBgerm, family = binomial, weights = num.seeds)
+
+summary(germtrtTB)
+```
+
