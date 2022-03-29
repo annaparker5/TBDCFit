@@ -1,0 +1,173 @@
+---
+title: "Heat map analysis"
+output: html_notebook
+---
+
+Joel wants me to make a heat map, showing plant condition across the plot and then plant seed production across the plot. This document creates those maps. 
+
+
+## 0. Load in packages and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+
+```{r}
+#herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
+pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
+#germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
+key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+census <- read.csv("~/Desktop/GitHub/TBDCFit/Data/CensusAug28.csv", header = TRUE)
+```
+
+
+
+## 1. Clean the data 
+
+**We want the following things in our dataset: pid, plant type, column, row, condition, and seed set. **
+
+```{r}
+key <- key %>%
+  select(pid, type, row, column)
+```
+
+```{r}
+TBseed <- TBseed %>%
+  select(pid, pod.avg)
+```
+
+```{r}
+pods <- pods %>%
+  select(PID, condition, num.pod.m)
+pods$conditionend <- pods$condition
+
+pods <- pods %>%
+  select(PID, conditionend, num.pod.m)
+```
+
+```{r}
+census <- census %>%
+  select(pid, condition)
+```
+
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(DCseed$pid)
+
+#2. Make output dataset
+
+DCseedout <- data.frame(pid = DCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- DCseed[DCseed$pid == DCpid[i], ]
+  DCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
+### Remove individuals that we couldn't sample due to mold/error
+
+```{r}
+TBseed <- TBseed[TBseed$pid != 23, ]
+TBseed <- TBseed[TBseed$pid != 141, ]
+```
+
+
+```{r}
+DCseedout <- DCseedout[DCseedout$pid != 78, ]
+DCseedout <- DCseedout[DCseedout$pid != 140, ]
+```
+
+
+```{r}
+pods <- pods[pods$PID != 23, ]
+pods <- pods[pods$PID != 141, ]
+pods <- pods[pods$PID != 78, ]
+pods <- pods[pods$PID != 140, ]
+```
+
+
+### Combine into one dataset
+
+```{r}
+comb <- merge(key, pods, by.x = "pid", by.y = "PID")
+
+combTB <- comb[comb$type == "TB", ]
+
+combDC <- comb[comb$type == "DC", ]
+
+combTB <- merge(combTB, TBseed, by = "pid", all.x = TRUE)
+combDC <- merge(combDC, DCseedout, by = "pid", all.x = TRUE)
+
+comb <- rbind(combTB, combDC)
+
+comb$repro <- comb$num.pod.m * comb$pod.avg
+
+comb$repro[is.na(comb$repro)] <- 0
+
+comb$lnrepro <- log(comb$repro + 1)
+
+comb <- merge(comb, census, by = "pid")
+
+
+comb$column <- gsub("C ", "C", comb$column)
+
+comb$row <- -(comb$row)
+```
+
+*Issue with TB plants 9, 25, 27, 59 - no pods but pod masses?? Left in as 0s for now*
+
+
+##  2. Make the heatmaps
+
+### Middle condition
+
+```{r}
+ggplot(data = comb, aes(x = column, y = row, fill = condition)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#F98B0B", high = "#360E61") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "Condition of plant")
+```
+
+### End  condition
+
+```{r}
+ggplot(data = comb, aes(x = column, y = row, fill = conditionend)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#F98B0B", high = "#360E61") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "Condition of plant")
+```
+
+
+### Seed set for DC
+
+```{r}
+ggplot(data = comb[comb$type == "DC", ], aes(x = column, y = row, fill = lnrepro)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#76D053", high = "#267C8E") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "ln(Total seed set)")
+```
+
+
+### Seed set for TB
+
+```{r}
+ggplot(data = comb[comb$type == "TB", ], aes(x = column, y = row, fill = lnrepro)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#76D053", high = "#267C8E") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "ln(Total seed set)")
+```
+
