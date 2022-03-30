@@ -149,6 +149,22 @@ ggplot(data = comb, aes(x = column, y = row, fill = conditionend)) +
   labs(x = "Column of plot", y  = "Row of plot", fill = "Condition of plant")
 ```
 
+```{r}
+ggplot(data = comb[comb$type == "DC", ], aes(x = column, y = row, fill = conditionend)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#F98B0B", high = "#360E61") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "Condition of plant")
+```
+
+```{r}
+ggplot(data = comb[comb$type == "TB", ], aes(x = column, y = row, fill = conditionend)) + 
+  theme_bw() + 
+  geom_tile() + 
+  scale_fill_gradient(low = "#F98B0B", high = "#360E61") + 
+  labs(x = "Column of plot", y  = "Row of plot", fill = "Condition of plant")
+```
+
 
 ### Seed set for DC
 
