@@ -39,8 +39,57 @@ comb <- merge(herb, germ, by = "pid")
 comb <- merge(comb, key, by = "pid")
 ```
 
+Convert num leaf to area
+
+```{r}
+combDC <- comb[comb$type == "DC", ]
+combTB <- comb[comb$type == "TB", ]
+
+combDC$area.leaf <- combDC$num.leaf * (((104.55 + 105.84 + 91.82)/3))
+combTB$area.leaf <- combTB$num.leaf * (1.5*((143.17 + 212.06 + 152.22)/3))
+
+comb <- rbind(combDC, combTB)
+comb$area.leaf <- comb$area.leaf / 10000
+
+comb$ln.area.leaf <- log(comb$area.leaf + 1)
+ 
+
+```
+
+
+
 ## 2. Run analyses 
 
+## FOR POSTER
+
+germ success by herbivory (DC and TB together)
+```{r}
+herbgerm <-  glmer(prop.sprouted ~ area.leaf*type + (1|flat), data = comb, family = binomial, weights = num.seeds)
+
+summary(herbgerm)
+anova(herbgerm, test = "Chisq")
+```
+
+
+
+### Graph
+
+```{r}
+herbgermplot <- ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted, color = type)) + 
+  theme_bw() + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Leaf surface area consumed (m^2)", y = "Proportion of seeds germinated", color = "Plant type")
+
+herbgermplot
+```
+
+
+
+
+
+
+## OTHER ANALYSES
 Column by germination success
 
 ```{r}
