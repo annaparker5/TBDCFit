@@ -82,6 +82,8 @@ herbgermplot <- ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted, color 
   labs(x = "Leaf surface area consumed (m^2)", y = "Proportion of seeds germinated", color = "Plant type")
 
 herbgermplot
+
+ggsave(plot = herbgermplot, "~/Desktop/GitHub/TBDCFit/Figures/PosterHerbGerm.png", width = 8, height = 5)
 ```
 
 
