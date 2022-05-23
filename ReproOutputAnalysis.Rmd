@@ -1,0 +1,63 @@
+---
+title: "Calculating total reproductive output"
+output: html_notebook
+---
+
+This notebook will create our total reproductive output metric, and graph it against herbivory. 
+
+
+## 0. Load libraries and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(lme4)
+```
+
+```{r}
+herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
+germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
+key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+```
+
+## 1. Clean the data
+
+Keep necessary columns
+
+```{r}
+herb <- herb %>%
+  select(pid, type, treatment, num.leaf)
+
+germ <- germ %>%
+  select(pid, flat, num.seeds, prop.sprouted)
+
+key <- key %>%
+  select(pid, column)
+```
+
+Combine datasets
+
+```{r}
+comb <- merge(herb, germ, by = "pid")
+comb <- merge(comb, key, by = "pid")
+```
+
+Convert num leaf to area
+
+```{r}
+combDC <- comb[comb$type == "DC", ]
+combTB <- comb[comb$type == "TB", ]
+
+combDC$area.leaf <- combDC$num.leaf * (((104.55 + 105.84 + 91.82)/3))
+combTB$area.leaf <- combTB$num.leaf * (1.5*((143.17 + 212.06 + 152.22)/3))
+
+comb <- rbind(combDC, combTB)
+comb$area.leaf <- comb$area.leaf / 10000
+
+comb$ln.area.leaf <- log(comb$area.leaf + 1)
+ 
+
+```
+
+
+
