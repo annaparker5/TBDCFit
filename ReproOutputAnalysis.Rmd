@@ -11,13 +11,17 @@ This notebook will create our total reproductive output metric, and graph it aga
 ```{r}
 library(tidyverse)
 library(ggplot2)
-library(lme4)
+#library(lme4)
+library(lmerTest)
 ```
 
 ```{r}
 herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
 germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
 key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
 ```
 
 ## 1. Clean the data
@@ -26,13 +30,13 @@ Keep necessary columns
 
 ```{r}
 herb <- herb %>%
-  select(pid, type, treatment, num.leaf)
+  select(pid, type, num.leaf)
 
 germ <- germ %>%
   select(pid, flat, num.seeds, prop.sprouted)
 
 key <- key %>%
-  select(pid, column)
+  select(pid, treatment, column)
 ```
 
 Combine datasets
@@ -42,7 +46,7 @@ comb <- merge(herb, germ, by = "pid")
 comb <- merge(comb, key, by = "pid")
 ```
 
-Convert num leaf to area
+### Convert num leaf to area
 
 ```{r}
 combDC <- comb[comb$type == "DC", ]
@@ -54,10 +58,208 @@ combTB$area.leaf <- combTB$num.leaf * (1.5*((143.17 + 212.06 + 152.22)/3))
 comb <- rbind(combDC, combTB)
 comb$area.leaf <- comb$area.leaf / 10000
 
-comb$ln.area.leaf <- log(comb$area.leaf + 1)
+#comb$ln.area.leaf <- log(comb$area.leaf + 1)
  
 
 ```
 
+### Get seed set per plant
 
+
+Remove the individuals that had mature pods that we couldn't measure due to damage/mold
+
+```{r}
+TBseed <- TBseed[TBseed$pid != 23, ]
+TBseed <- TBseed[TBseed$pid != 141, ]
+```
+
+```{r}
+pods <- pods[pods$PID != 23, ]
+pods <- pods[pods$PID != 141, ]
+```
+
+Remove unneeded rows from TBseed and pods
+
+```{r}
+TBseed <- TBseed %>%
+  select(pid, mature, kept, pod.avg, holes.)
+```
+
+```{r}
+pods <- pods %>%
+  select(PID, num.pod.m)
+```
+
+### Write a for loop to get avg seed number per pod for DC
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(DCseed$pid)
+
+#2. Make output dataset
+
+DCseedout <- data.frame(pid = DCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- DCseed[DCseed$pid == DCpid[i], ]
+  DCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
+### Remove DC where we couldn't find pods / pods rotten
+
+```{r}
+DCseedout <- DCseedout[DCseedout$pid != 78, ]
+DCseedout <- DCseedout[DCseedout$pid != 140, ]
+```
+
+### Remove pods with spodoptera damage
+
+```{r}
+TBseed <- TBseed[TBseed$holes. != "yes", ]
+```
+
+### Remove TB plants without mature seeds
+
+```{r}
+TBseed <- TBseed[complete.cases(TBseed[, 4]), ]
+```
+
+### Convert TB pod masses to seed masses
+
+```{r}
+TBseed$seed.avg <- TBseed$pod.avg - 82.9 ##average mass of seed pod husk from 5/30
+TBseed <- TBseed[TBseed$seed.avg > 0,  ]
+
+TBseed <- TBseed %>%
+  select(pid, seed.avg)
+```
+
+## 2. Get standardized seed set metric
+
+1. Multiply avg seed set per plant by number of mature pods produced
+2. Get mean of control group seed set by each  plant type
+3. Divide each individual by that mean 
+4. Combine into one dataset 
+
+### Step 1
+
+
+```{r}
+DCseedout <- merge(DCseedout, pods, by.x = "pid", by.y = "PID")
+TBseed <- merge(TBseed, pods, by.x = "pid", by.y = "PID")
+
+DCseedout$tot.seed.set <- DCseedout$pod.avg * DCseedout$num.pod.m
+TBseed$tot.seed.set <- TBseed$seed.avg * TBseed$num.pod.m
+```
+
+
+```{r}
+DCseedout <- merge(DCseedout, key, by = "pid")
+
+DCseedout <- DCseedout %>%
+  select(pid, treatment, tot.seed.set)
+
+DCseedCON <- DCseedout[DCseedout$treatment == "CON", ]
+
+medianDC <- median(DCseedCON$tot.seed.set)
+
+```
+
+
+```{r}
+TBseed <- merge(TBseed, key, by = "pid")
+
+TBseed <- TBseed %>%
+  select(pid, treatment, tot.seed.set)
+
+TBseedCON <- TBseed[TBseed$treatment == "CON", ]
+
+medianTB <- median(TBseedCON$tot.seed.set)
+
+```
+
+
+### Step 2
+
+```{r}
+DCseedout$stand.seed <- DCseedout$tot.seed.set / medianDC
+
+TBseed$stand.seed <- TBseed$tot.seed.set / medianTB
+```
+
+
+
+## 3. Combine everything together
+
+```{r}
+comb <- merge(comb, pods, by.x = "pid", by.y = "PID")
+
+comb <- merge(comb, DCseedout, by = c("pid", "treatment"), all.x = TRUE)
+comb <- merge(comb, TBseed, by = c("pid", "treatment"), all.x = TRUE)
+
+comb$stand.seed.set <- paste(comb$stand.seed.x, comb$stand.seed.y, sep = "")
+comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
+```
+
+Remove plants for which we removed the TB pods
+
+```{r}
+comb <- comb[comb$stand.seed.set > 0, ]
+```
+
+
+### Calculate fitness: 
+
+```{r}
+comb$stand.seed.set <- as.numeric(comb$stand.seed.set)
+
+comb$rel.fitness <- comb$prop.sprouted * comb$stand.seed.set
+```
+
+
+## 4. Run some models:
+
+```{r}
+modseedset <- lmer(stand.seed.set ~ area.leaf*type + (1|column), data = comb)
+
+summary(modseedset)
+
+```
+
+```{r}
+modgerm <- glmer(prop.sprouted ~ area.leaf*type + (1|column), data = comb, family = "binomial", weights = num.seeds)
+
+summary(modgerm)
+```
+
+
+```{r}
+modfitness <- lmer(rel.fitness ~ area.leaf*type + (1|column), data = comb)
+
+summary(modfitness)
+```
+
+## 5. Graph things
+
+```{r}
+ggplot(data = comb, aes(x = area.leaf, y = stand.seed.set,  color = treatment)) + 
+  geom_point(aes(shape = type)) + 
+  ylim(0,20)
+```
+
+
+```{r}
+ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted,  color = treatment)) + 
+  geom_point(aes(shape = type)) 
+```
+
+```{r}
+ggplot(data = comb, aes(x = area.leaf, y = rel.fitness,  color = treatment)) + 
+  geom_point(aes(shape = type)) 
+```
 
