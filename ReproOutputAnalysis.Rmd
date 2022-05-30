@@ -249,17 +249,33 @@ summary(modfitness)
 ```{r}
 ggplot(data = comb, aes(x = area.leaf, y = stand.seed.set,  color = treatment)) + 
   geom_point(aes(shape = type)) + 
-  ylim(0,20)
+  theme_bw() + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 4)) + 
+  ylim(0,20) + 
+  labs(x = "Leaf area consumed (m2)", y = "Standardized seed set", color = "Treatment group",
+       shape = "Hostplant")
 ```
 
 
 ```{r}
 ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted,  color = treatment)) + 
-  geom_point(aes(shape = type)) 
+  geom_point(aes(shape = type))  + 
+  theme_bw() + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 4)) + 
+  labs(x = "Leaf area consumed (m2)", y = "Proportion of seeds sprouted", 
+       color = "Treatment group", shape = "Hostplant")
 ```
 
 ```{r}
 ggplot(data = comb, aes(x = area.leaf, y = rel.fitness,  color = treatment)) + 
-  geom_point(aes(shape = type)) 
+  geom_point(aes(shape = type)) + 
+  theme_bw() + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 4)) + 
+  ylim(0, 10) + 
+  labs(x = "Leaf area consumed (m2)", y = "Relative fitness", color = "Treatment group",
+       shape = "Hostplant")
 ```
 
