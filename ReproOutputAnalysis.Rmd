@@ -212,20 +212,27 @@ Remove plants for which we removed the TB pods
 comb <- comb[comb$stand.seed.set > 0, ]
 ```
 
+Remove plants that didn't germinate at all
+
+```{r}
+comb <- comb[comb$prop.sprouted > 0, ]
+```
+
 
 ### Calculate fitness: 
 
 ```{r}
 comb$stand.seed.set <- as.numeric(comb$stand.seed.set)
+comb$ln.stand.seed.set <- log(comb$stand.seed.set)
 
-comb$rel.fitness <- comb$prop.sprouted * comb$stand.seed.set
+comb$rel.fitness <- comb$prop.sprouted * comb$ln.stand.seed.set
 ```
 
 
 ## 4. Run some models:
 
 ```{r}
-modseedset <- lmer(stand.seed.set ~ area.leaf*type + (1|column), data = comb)
+modseedset <- lmer(ln.stand.seed.set ~ area.leaf*type + (1|column), data = comb)
 
 summary(modseedset)
 
@@ -244,38 +251,57 @@ modfitness <- lmer(rel.fitness ~ area.leaf*type + (1|column), data = comb)
 summary(modfitness)
 ```
 
+```{r}
+plot(modfitness)
+```
+
+
+
 ## 5. Graph things
 
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = stand.seed.set,  color = treatment)) + 
-  geom_point(aes(shape = type)) + 
+ggplot(data = comb, aes(x = area.leaf, y = ln.stand.seed.set)) + 
+  geom_smooth(method = "lm", color = "black") + 
+  geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 4)) + 
-  ylim(0,20) + 
+  scale_shape_manual(values = c(16, 5)) + 
   labs(x = "Leaf area consumed (m2)", y = "Standardized seed set", color = "Treatment group",
        shape = "Hostplant")
 ```
 
 
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted,  color = treatment)) + 
-  geom_point(aes(shape = type))  + 
+ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted, shape = type)) + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm") + 
+  scale_linetype_manual(values = c("solid", "dotdash")) + 
+  geom_point(aes(color = treatment)) + 
   theme_bw() + 
+  ylim(0, 1) + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 4)) + 
+  scale_shape_manual(values = c(16, 5)) + 
   labs(x = "Leaf area consumed (m2)", y = "Proportion of seeds sprouted", 
-       color = "Treatment group", shape = "Hostplant")
+       color = "Treatment group", shape = "Hostplant") 
+  
 ```
 
+
+
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = rel.fitness,  color = treatment)) + 
-  geom_point(aes(shape = type)) + 
+ggplot(data = comb, aes(x = area.leaf, y = rel.fitness)) + 
+  #geom_smooth(method = "lm", color = "black") + 
+  geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 4)) + 
-  ylim(0, 10) + 
+  scale_shape_manual(values = c(16, 5)) + 
   labs(x = "Leaf area consumed (m2)", y = "Relative fitness", color = "Treatment group",
        shape = "Hostplant")
 ```
+
+```{r}
+ggplot(aes(x = prop.sprouted, y = ln.stand.seed.set), data = comb) + 
+  geom_point(aes(color = type)) + 
+  geom_smooth(method = "lm")
+```
+
 
