@@ -206,13 +206,13 @@ comb$stand.seed.set <- paste(comb$stand.seed.x, comb$stand.seed.y, sep = "")
 comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
 ```
 
-Remove plants for which we removed the TB pods
+Remove plants where they didn't have any seeds
 
 ```{r}
 comb <- comb[comb$stand.seed.set > 0, ]
 ```
 
-Remove plants that didn't germinate at all
+Remove plants that didn't germinate at all **ASK BECKY**
 
 ```{r}
 comb <- comb[comb$prop.sprouted > 0, ]
@@ -260,45 +260,61 @@ plot(modfitness)
 ## 5. Graph things
 
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = ln.stand.seed.set)) + 
-  geom_smooth(method = "lm", color = "black") + 
+seedsetplot <- ggplot(data = comb, aes(x = area.leaf, y = ln.stand.seed.set)) + 
+  geom_smooth(method = "lm", color = "black", alpha = 0.2) + 
   geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   scale_shape_manual(values = c(16, 5)) + 
-  labs(x = "Leaf area consumed (m2)", y = "Standardized seed set", color = "Treatment group",
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Standardized seed set", color = "Treatment group",
        shape = "Hostplant")
+
+seedsetplot
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/seedsetherb.png", seedsetplot, width = 8, height = 5)
 ```
 
 
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted, shape = type)) + 
-  geom_smooth(aes(linetype = type), color = "black", method = "lm") + 
+germplot <- ggplot(data = comb, aes(x = area.leaf, y = prop.sprouted, shape = type)) + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
   geom_point(aes(color = treatment)) + 
   theme_bw() + 
   ylim(0, 1) + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   scale_shape_manual(values = c(16, 5)) + 
-  labs(x = "Leaf area consumed (m2)", y = "Proportion of seeds sprouted", 
-       color = "Treatment group", shape = "Hostplant") 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Proportion of seeds sprouted", 
+       color = "Treatment group", shape = "Hostplant", linetype = "Hostplant") 
+
+germplot
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/germherb.png", germplot, width = 8, height = 5)
   
 ```
 
 
 
 ```{r}
-ggplot(data = comb, aes(x = area.leaf, y = rel.fitness)) + 
+fitnessplot <- ggplot(data = comb, aes(x = area.leaf, y = rel.fitness)) + 
   #geom_smooth(method = "lm", color = "black") + 
   geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   scale_shape_manual(values = c(16, 5)) + 
-  labs(x = "Leaf area consumed (m2)", y = "Relative fitness", color = "Treatment group",
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative fitness", color = "Treatment group",
        shape = "Hostplant")
+
+fitnessplot
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/fitnessherb.png", fitnessplot, width = 8, height = 5)
+
 ```
 
 ```{r}
+cormodel <- lm(ln.stand.seed.set ~ prop.sprouted, data = comb)
+summary(cormodel)
+
+
 ggplot(aes(x = prop.sprouted, y = ln.stand.seed.set), data = comb) + 
   geom_point(aes(color = type)) + 
   geom_smooth(method = "lm")
