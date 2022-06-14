@@ -5,3 +5,257 @@ output: html_notebook
 
 This script makes graphs for my 2022 Evolution talk. 
 
+Plan of attack: 
+
+1) Make 3-level "theoretical" figure about expectations for herbivory
+2) Make Histograms of herbivory by treatment group from the 2020 leaf scanner experiment 
+3) Remake 2021 seed set graph to include all seed set plants (still excluding zeros)
+4) Rerun stats on all seed set plants (excluding zeros still)
+5) Run new stats on binary: did the plants produce seed? (By herbivory and plant type)
+
+
+# 0. Load in packages
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lmerTest)
+```
+
+# 1. Make theoretical figure with nice distributions to match results figure 
+
+## Game plan: 
+
+A. Come up with reasonable centers for each distribution
+B. Make dataset with treatment, plant type, and different normal distributions for herbivory and seed set for the controls (centered on zero). 
+C. Repeat for WAND, WE, WOWE
+D. Graph it in increments to step through each treatment separately 
+
+
+## A. Centers for distributions
+
+CON (same for DC and TB): 
+Herb: 0, SD 0 
+Seed set: 0, SD 0.25
+
+WAND
+TB Herb: .25, SD .025
+TB seed set: -1, SD .25
+DC Herb: .25, SD .025
+DC seed set: -1.25, SD .25
+
+WE
+TB Herb: .1, SD .025
+TB seed set: -.5, SD .25
+DC Herb: .1, SD .025
+DC seed set: -.6, SD .25
+
+WOWE
+TB Herb: .5, SD .025
+TB Seed set: -2, SD .25
+DC Herb: .5, SD .025
+DC Seed set: -2.5, SD .25
+
+
+```{r}
+set.seed(5)
+```
+
+
+
+## B. Make dataset for Controls
+
+Some standardization: 10 datapoints per treatment group (for a total of 80)
+
+```{r}
+CONTB <- data.frame(
+  pid = 1:10,
+  treatment = "CON", 
+  type = "TB", 
+  herb = rnorm(10, mean = 0, sd = 0), 
+  seedset = rnorm(10, mean = 0, sd = .25)
+)
+```
+
+```{r}
+CONDC <- data.frame(
+  pid = 11:20,
+  treatment = "CON", 
+  type = "DC", 
+  herb = rnorm(10, mean = 0, sd = 0), 
+  seedset = rnorm(10, mean = 0, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(CONTB, CONDC)
+```
+
+
+## C. Make for other three treatment groups
+
+
+```{r}
+WANDTB <- data.frame(
+  pid = 21:30,
+  treatment = "WAND", 
+  type = "TB", 
+  herb = rnorm(10, mean = 0.25, sd = 0.025), 
+  seedset = rnorm(10, mean = -1, sd = .25)
+)
+```
+
+
+```{r}
+theodata <- rbind(theodata, WANDTB)
+```
+
+
+```{r}
+WANDDC <- data.frame(
+  pid = 31:40,
+  treatment = "WAND", 
+  type = "DC", 
+  herb = rnorm(10, mean = 0.25, sd = 0.025), 
+  seedset = rnorm(10, mean = -1.25, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(theodata, WANDDC)
+```
+
+
+
+```{r}
+WETB <- data.frame(
+  pid = 41:50,
+  treatment = "WE", 
+  type = "TB", 
+  herb = rnorm(10, mean = 0.1, sd = 0.025), 
+  seedset = rnorm(10, mean = -.5, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(theodata, WETB)
+```
+
+```{r}
+WEDC <- data.frame(
+  pid = 51:60,
+  treatment = "WE", 
+  type = "DC", 
+  herb = rnorm(10, mean = 0.1, sd = 0.025), 
+  seedset = rnorm(10, mean = -.6, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(theodata, WEDC)
+```
+
+
+
+```{r}
+WOWETB <- data.frame(
+  pid = 61:70,
+  treatment = "WOWE", 
+  type = "TB", 
+  herb = rnorm(10, mean = 0.5, sd = 0.025), 
+  seedset = rnorm(10, mean = -2, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(theodata, WOWETB)
+```
+
+```{r}
+WOWEDC <- data.frame(
+  pid = 71:80,
+  treatment = "WOWE", 
+  type = "DC", 
+  herb = rnorm(10, mean = 0.5, sd = 0.025), 
+  seedset = rnorm(10, mean = -2.5, sd = .25)
+)
+```
+
+```{r}
+theodata <- rbind(theodata, WOWEDC)
+```
+
+## D. Make incremental graphs
+
+Total graph just to check: 
+
+```{r}
+totalplot <- ggplot(data = theodata, aes(x = herb, y = seedset, shape = type)) + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
+  scale_linetype_manual(values = c("solid", "dotdash")) + 
+  geom_point(aes(color = treatment)) + 
+  theme_bw() + 
+  ylim(-3.1, 0.6) + 
+  xlim(0, .55) + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  scale_shape_manual(values = c(16, 5)) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
+       color = "Treatment group", shape = "Hostplant", linetype = "Hostplant") 
+
+totalplot
+
+```
+
+We like it! Now on to each separate plot
+
+WAND
+
+```{r}
+WANDplot <- ggplot(data = theodata[theodata$treatment == "CON" | theodata$treatment == "WAND", ], 
+                   aes(x = herb, y = seedset, shape = type)) + 
+  geom_point(aes(color = treatment)) + 
+  theme_bw() + 
+  ylim(-3.1, 0.6) + 
+  xlim(0, .55) + 
+  scale_color_manual(values = c("#1E88E5", "lime green")) + 
+  scale_shape_manual(values = c(16, 5)) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
+       color = "Treatment group", shape = "Hostplant") 
+
+WANDplot
+
+```
+
+WE
+
+```{r}
+WEplot <- ggplot(data = theodata[theodata$treatment != "WOWE", ], aes(x = herb, y = seedset, shape = type)) + 
+  geom_point(aes(color = treatment)) + 
+  theme_bw() + 
+  ylim(-3.1, 0.6) + 
+  xlim(0, .55) + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange")) + 
+  scale_shape_manual(values = c(16, 5)) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
+       color = "Treatment group", shape = "Hostplant") 
+
+WEplot
+
+```
+
+WOWE
+
+```{r}
+WOWEplot <- ggplot(data = theodata, aes(x = herb, y = seedset, shape = type)) + 
+  geom_point(aes(color = treatment)) + 
+  theme_bw() + 
+  ylim(-3.1, 0.6) + 
+  xlim(0, .55) + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
+  scale_shape_manual(values = c(16, 5)) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
+       color = "Treatment group", shape = "Hostplant") 
+
+WOWEplot
+
+```
