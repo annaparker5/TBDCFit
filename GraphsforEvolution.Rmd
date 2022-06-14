@@ -356,32 +356,44 @@ scandata <- data %>%
 WAND
 
 ```{r}
-ggplot(data = scandata[scandata$fate == "wander", ], aes(x = area)) + 
+WANDhist <- ggplot(data = scandata[scandata$fate == "wander", ], aes(x = area)) + 
   geom_density(aes(fill = food), color = "lime green", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
   scale_fill_manual(values = c("white", "lime green")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+
+WANDhist
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WANDhist.png", WANDhist, width = 8, height = 2)
 ```
 
 WE
 
 ```{r}
-ggplot(data = scandata[scandata$fate == "em", ], aes(x = area)) + 
+WEhist <- ggplot(data = scandata[scandata$fate == "em", ], aes(x = area)) + 
   geom_density(aes(fill = food), color = "orange", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
   scale_fill_manual(values = c("white", "orange")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+
+WEhist
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WEhist.png", WEhist, width = 8, height = 2)
 ```
 
 WOWE
 
 ```{r}
-ggplot(data = scandata[scandata$fate == "wowe mongo", ], aes(x = area)) + 
+WOWEhist <- ggplot(data = scandata[scandata$fate == "wowe mongo", ], aes(x = area)) + 
   geom_density(aes(fill = food), color = "#D81B60", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
   scale_fill_manual(values = c("white", "#D81B60")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+
+WOWEhist
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WOWEhist.png", WOWEhist, width = 8, height = 2)
 ```
