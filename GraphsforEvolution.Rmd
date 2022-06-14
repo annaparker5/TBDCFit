@@ -204,6 +204,8 @@ totalplot <- ggplot(data = theodata, aes(x = herb, y = seedset, shape = type)) +
 
 totalplot
 
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/totaltheo.png", totalplot, width = 8, height = 5)
+
 ```
 
 We like it! Now on to each separate plot
@@ -224,6 +226,8 @@ WANDplot <- ggplot(data = theodata[theodata$treatment == "CON" | theodata$treatm
 
 WANDplot
 
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WANDtheo.png", WANDplot, width = 8, height = 5)
+
 ```
 
 WE
@@ -241,6 +245,8 @@ WEplot <- ggplot(data = theodata[theodata$treatment != "WOWE", ], aes(x = herb, 
 
 WEplot
 
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WEtheo.png", WEplot, width = 8, height = 5)
+
 ```
 
 WOWE
@@ -257,5 +263,7 @@ WOWEplot <- ggplot(data = theodata, aes(x = herb, y = seedset, shape = type)) +
        color = "Treatment group", shape = "Hostplant") 
 
 WOWEplot
+
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WOWEtheo.png", WOWEplot, width = 8, height = 5)
 
 ```
