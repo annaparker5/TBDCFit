@@ -617,4 +617,37 @@ summary(modcompseedset)
 
 ```
 
+# 5. Run new stats on binary "did it make seeds?" metric
 
+Gameplan: 
+
+A. Use old dataset and write a for loop to add in "yes/no" seed production column
+B. Run model 
+
+## A. Write the loop 
+
+Add in new column
+
+```{r}
+comb$any.seeds <- 0
+```
+
+```{r}
+for(i in 1:length(unique(comb$pid))){
+  if(is.na(comb[i, 11]) == "TRUE"){
+    comb[i, 12] <- 0
+  }else if(is.na(comb[i, 11]) == "FALSE"){
+    comb[i, 12] <- 1
+  }
+}
+```
+
+## B. Run model
+
+```{r}
+anyseedsmod <- glmer(any.seeds ~ area.leaf* type + (1|column), data = comb, family = "binomial")
+
+summary(anyseedsmod)
+```
+
+More tobacco failed to produce seeds, but herbivory level did not matter. 
