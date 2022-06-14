@@ -267,3 +267,121 @@ WOWEplot
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WOWEtheo.png", WOWEplot, width = 8, height = 5)
 
 ```
+
+# 2. Make histograms from leaf scanner expt. 
+
+Game plan: 
+
+A. Load in leaf scanner data
+B. Calculate total herbivory using for loops 
+C. Separate into columns I need (ID, treatment, type, total herbivory)
+D. Make histograms with different fills by type in the same color for each treatment 
+
+
+## A. Load in leaf scanner data and clean
+
+```{r}
+data <- read.csv("~/Desktop/MsCcHSFeedJan1MOD.csv")
+scan <- read.csv("~/Desktop/MsCcHSFeedLeafScanFinal.csv", header = T)
+```
+
+```{r}
+data <- data[data$fate != "dead" & data$fate != "quink" & data$fate != "wander*" & data$fate != "?", ]
+data <- data[complete.cases(data[, 1]), ]
+data$fate <- factor(data$fate, levels = c("wander", "em", "wowe", "wowe mongo"))
+
+```
+
+
+## B. Run the for loop
+
+
+```{r}
+#1
+scan$comb <- paste(scan$Caterpillar.ID, "_", scan$Leaf.ID)
+
+#0
+unique <- unique(scan$comb)
+consumed <- as.data.frame(unique)
+consumed$area <- 0
+
+#2-4
+for (i in 1:length(consumed$unique)){
+    subset <- filter(scan, scan$comb == consumed[i, 1])
+    value <- max(subset$Leaf.Area) - min(subset$Leaf.Area)
+    consumed[i, 2] <- value
+}  
+
+#5
+consumed <- consumed %>%
+  separate(unique, c("catID", "leafID"), "_")
+
+#6
+ID <- unique(consumed$catID)
+consumedsum <- as.data.frame(ID)
+consumedsum$totalarea <- 0
+
+#7
+for (i in 1:length(consumedsum$ID)){
+  subset2 <- filter(consumed, consumed$catID == consumedsum[i, 1])
+  value2 <- sum(subset2$area)
+  consumedsum[i, 2] <- value2
+}
+
+#8
+consumedsum$ID <- as.numeric(consumedsum$ID)
+
+consumedsum <- consumedsum[consumedsum$ID %in% data$ID, ]
+
+data <- data[data$ID %in% consumedsum$ID, ]
+
+consumedsum <- consumedsum[order(consumedsum$ID), ]
+
+data$area <- consumedsum$totalarea
+
+data$area <- data$area / 10000
+
+```
+
+
+## C. Pare down into columns I need
+
+```{r}
+scandata <- data %>%
+  select(ID, food, fate, area)
+```
+
+## D. Make histogram
+
+WAND
+
+```{r}
+ggplot(data = scandata[scandata$fate == "wander", ], aes(x = area)) + 
+  geom_density(aes(fill = food), color = "lime green", position = "identity", alpha = 0.5) + 
+  theme_bw() + 
+  xlim(0, .6) + 
+  scale_fill_manual(values = c("white", "lime green")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+```
+
+WE
+
+```{r}
+ggplot(data = scandata[scandata$fate == "em", ], aes(x = area)) + 
+  geom_density(aes(fill = food), color = "orange", position = "identity", alpha = 0.5) + 
+  theme_bw() + 
+  xlim(0, .6) + 
+  scale_fill_manual(values = c("white", "orange")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+```
+
+WOWE
+
+```{r}
+ggplot(data = scandata[scandata$fate == "wowe mongo", ], aes(x = area)) + 
+  geom_density(aes(fill = food), color = "#D81B60", position = "identity", alpha = 0.5) + 
+  theme_bw() + 
+  xlim(0, .6) + 
+  scale_fill_manual(values = c("white", "#D81B60")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+```
