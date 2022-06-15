@@ -13,6 +13,7 @@ Plan of attack:
 4) Rerun stats on all seed set plants (excluding zeros still)
 5) Run new stats on binary: did the plants produce seed? (By herbivory and plant type)
 
+**After talking with Joel 6/15, I am not using #3 - instead I'm using Tyler's relative fitness figure, just with added regression lines. **
 
 # 0. Load in packages
 
