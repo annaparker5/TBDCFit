@@ -261,13 +261,14 @@ plot(modfitness)
 
 ```{r}
 seedsetplot <- ggplot(data = comb, aes(x = area.leaf, y = ln.stand.seed.set)) + 
-  geom_smooth(method = "lm", color = "black", alpha = 0.2) + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
+  scale_linetype_manual(values = c("solid", "dotdash")) +
   geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
   scale_shape_manual(values = c(16, 5)) + 
-  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Standardized seed set", color = "Treatment group",
-       shape = "Hostplant")
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Standardized seed set", 
+       color = "Treatment group",shape = "Hostplant", linetype = "Hostplant")
 
 seedsetplot
 
