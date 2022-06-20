@@ -15,6 +15,8 @@ Plan of attack:
 
 **After talking with Joel 6/15, I am not using #3 - instead I'm using Tyler's relative fitness figure, just with added regression lines. **
 
+**After talking with Joel 6/15, I made more cartoonish versions for #1, but I kept the code to use for figure captions on my cartoon figures.**
+
 # 0. Load in packages
 
 ```{r}
@@ -220,8 +222,8 @@ WANDplot <- ggplot(data = theodata[theodata$treatment == "CON" | theodata$treatm
   theme_bw() + 
   ylim(-3.1, 0.6) + 
   xlim(0, .55) + 
-  scale_color_manual(values = c("#1E88E5", "lime green")) + 
-  scale_shape_manual(values = c(16, 5)) + 
+  scale_color_manual(values = c("#1E88E5", "lime green"), labels = c("No caterpillar", "Normal")) + 
+  scale_shape_manual(values = c(16, 5), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
        color = "Treatment group", shape = "Hostplant") 
 
@@ -239,8 +241,9 @@ WEplot <- ggplot(data = theodata[theodata$treatment != "WOWE", ], aes(x = herb, 
   theme_bw() + 
   ylim(-3.1, 0.6) + 
   xlim(0, .55) + 
-  scale_color_manual(values = c("#1E88E5", "lime green", "orange")) + 
-  scale_shape_manual(values = c(16, 5)) + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange"), 
+                     labels = c("No caterpillar", "Normal", "Parasitized")) + 
+  scale_shape_manual(values = c(16, 5), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
        color = "Treatment group", shape = "Hostplant") 
 
@@ -258,8 +261,9 @@ WOWEplot <- ggplot(data = theodata, aes(x = herb, y = seedset, shape = type)) +
   theme_bw() + 
   ylim(-3.1, 0.6) + 
   xlim(0, .55) + 
-  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
-  scale_shape_manual(values = c(16, 5)) + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60"), 
+                     labels = c("No caterpillar", "Normal", "Parasitized", "Parasitized + Heat" )) + 
+  scale_shape_manual(values = c(16, 5), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative Fitness", 
        color = "Treatment group", shape = "Hostplant") 
 
@@ -626,7 +630,7 @@ fitplot <- ggplot(data = comb, aes(x = area.leaf, y = rel.fitness, shape = type)
   geom_point(aes(color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60"), 
-                     labels = c("Control", "Normal", "Parasitized", "Parasitized + Heat")) + 
+                     labels = c("No caterpillar", "Normal", "Parasitized", "Parasitized + Heat")) + 
   scale_shape_manual(values = c(16, 5), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative plant fitness", 
        color = "Treatment group", linetype = "Hostplant", shape = "Hostplant")
