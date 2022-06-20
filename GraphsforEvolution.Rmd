@@ -361,8 +361,8 @@ WANDhist <- ggplot(data = scandata[scandata$fate == "wander", ], aes(x = area)) 
   geom_density(aes(fill = food), color = "lime green", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
-  scale_fill_manual(values = c("white", "lime green")) + 
-  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
+  scale_fill_manual(values = c("white", "lime green"), labels = c("Devil's claw", "Tobacco")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant") 
 
 WANDhist
 
@@ -376,7 +376,7 @@ WEhist <- ggplot(data = scandata[scandata$fate == "em", ], aes(x = area)) +
   geom_density(aes(fill = food), color = "orange", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
-  scale_fill_manual(values = c("white", "orange")) + 
+  scale_fill_manual(values = c("white", "orange"), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
 
 WEhist
@@ -391,7 +391,7 @@ WOWEhist <- ggplot(data = scandata[scandata$fate == "wowe mongo", ], aes(x = are
   geom_density(aes(fill = food), color = "#D81B60", position = "identity", alpha = 0.5) + 
   theme_bw() + 
   xlim(0, .6) + 
-  scale_fill_manual(values = c("white", "#D81B60")) + 
+  scale_fill_manual(values = c("white", "#D81B60"), labels = c("Devil's claw", "Tobacco")) + 
   labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Frequency", fill = "Hostplant")
 
 WOWEhist
@@ -405,7 +405,7 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/WOWEhist.png", WOWEhist
 Gameplan: 
 
 A. Load in datasets and rerun code 
-B. Redo data analysis to include all plants with a seed set metric
+B. Redo fitness analysis 
 C. Remake graph according to the new dataset
 
 ## A. Load in dataset
@@ -413,6 +413,7 @@ C. Remake graph according to the new dataset
 ```{r}
 herb <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbivoryCleaned.csv", header = TRUE)
 key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
 pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
 TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
 DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
@@ -546,7 +547,11 @@ TBseed$stand.seed <- TBseed$tot.seed.set / medianTB
 
 ### Merge herbivory and key dataset
 
+
 ```{r}
+germ <- germ %>%
+  select(pid, flat, num.seeds, prop.sprouted)
+
 herb <- herb %>%
   select(pid, type, num.leaf)
 
@@ -554,6 +559,8 @@ key <- key %>%
   select(pid, treatment, column)
 
 comb <- merge(herb, key, by = "pid")
+
+comb <- merge(comb, germ, by = "pid")
 ```
 
 ### Get leaf number to area
@@ -584,28 +591,49 @@ comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
 
 comb$stand.seed.set <- as.numeric(comb$stand.seed.set)
 
-combnoseeds <- comb[comb$stand.seed.set > 0, ]
-combnoseeds <- combnoseeds[is.na(combnoseeds$stand.seed.set) == "FALSE", ]
-
-combnoseeds$ln.stand.seed.set <- log(combnoseeds$stand.seed.set)
 ```
+
+Remove plants where they didn't have any seeds
+
+```{r}
+comb <- comb[comb$stand.seed.set > 0, ]
+comb <- comb[is.na(comb$stand.seed.set) == FALSE, ]
+```
+
+Remove plants that didn't germinate at all **ASK BECKY**
+
+```{r}
+comb <- comb[comb$prop.sprouted > 0, ]
+```
+
+
+### Calculate fitness: 
+
+```{r}
+comb$stand.seed.set <- as.numeric(comb$stand.seed.set)
+comb$ln.stand.seed.set <- log(comb$stand.seed.set)
+
+comb$rel.fitness <- comb$prop.sprouted * comb$ln.stand.seed.set
+```
+
 
 ## C. Graph! 
 
 ```{r}
-compseedsetplot <- ggplot(data = combnoseeds, aes(x = area.leaf, y = ln.stand.seed.set, shape = type)) + 
+fitplot <- ggplot(data = comb, aes(x = area.leaf, y = rel.fitness, shape = type)) + 
   geom_smooth(aes(linetype = type,), method = "lm", color = "black", alpha = 0.2) + 
-  scale_linetype_manual(values = c("solid", "dotdash")) + 
+  scale_linetype_manual(values = c("solid", "dotdash"), labels = c("Devil's claw", "Tobacco")) + 
   geom_point(aes(color = treatment)) + 
   theme_bw() + 
-  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60")) + 
-  scale_shape_manual(values = c(16, 5)) + 
-  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Standardized seed set", 
+  scale_color_manual(values = c("#1E88E5", "lime green", "orange", "#D81B60"), 
+                     labels = c("Control", "Normal", "Parasitized", "Parasitized + Heat")) + 
+  scale_shape_manual(values = c(16, 5), labels = c("Devil's claw", "Tobacco")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative plant fitness", 
        color = "Treatment group", linetype = "Hostplant", shape = "Hostplant")
 
-compseedsetplot
+fitplot
 
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/compseedset.png", compseedsetplot, width = 8, 
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/relativefitness.png", fitplot, width = 8, 
        height = 5)
 ```
 
