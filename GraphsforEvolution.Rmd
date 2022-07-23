@@ -641,6 +641,27 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/EvolutionGraphs/relativefitness.png", f
        height = 5)
 ```
 
+## **FOR DISSERTATION PRESENTATION**
+
+
+```{r}
+fitplotdiss <- ggplot(data = comb, aes(x = area.leaf, y = rel.fitness, shape = type)) + 
+  geom_smooth(aes(linetype = type,), method = "lm", color = "dark gray", alpha = 0.2) + 
+  scale_linetype_manual(values = c("dotdash", "solid"), labels = c("Devil's claw", "Tobacco")) + 
+  geom_point(aes(color = treatment)) + 
+  theme_bw() + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60"), 
+                     labels = c("No caterpillar", "Wander", "WE", "WOWE")) + 
+  scale_shape_manual(values = c(5, 16), labels = c("Devil's claw", "Tobacco")) + 
+  labs(x = expression(paste("Leaf area consumed ", (m^{2}))), y = "Relative plant fitness", 
+       color = "Treatment group", linetype = "Hostplant", shape = "Hostplant")
+
+fitplotdiss
+
+ggsave("~/Desktop/relativefitness.png", fitplotdiss, width = 8, height = 5)
+```
+
+
 # 4. Rerun stats 
 
 ```{r}
