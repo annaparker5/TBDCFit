@@ -108,10 +108,10 @@ leafarea <- function(dataframe, output){
               value <- value + 50
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + 150
+                  value <- value + 200
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + 200
+                    value <- value + 250
                   }
             } else if(is_even(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
@@ -130,10 +130,10 @@ leafarea <- function(dataframe, output){
               value <- value + (50 * (subset[j+1, 4] - subset[j, 4]))
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + (150 * (subset[j+1, 4] - subset[j, 4]))
+                  value <- value + (200 * (subset[j+1, 4] - subset[j, 4]))
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + (200 * (subset[j+1, 4] - subset[j, 4]))
+                    value <- value + (250 * (subset[j+1, 4] - subset[j, 4]))
                   }
           } else if(is_even(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
@@ -171,5 +171,39 @@ outputfield <- leafarea(dataframe = herbfield, output = outputfield)
 outputgreen <- leafarea(dataframe = herbgreen, output = outputgreen)
 ```
 
+
+this looks great! Graph to test output: 
+
+# 3. Graph (after adding treatment)
+
+```{r}
+keyfield <- keyfield %>%
+  select(pid, type, treatment)
+
+keygreen <- keygreen %>%
+  select(pid, type, treatment)
+```
+
+```{r}
+outputfield <- merge(outputfield, keyfield, by.x = "PID", by.y = "pid")
+
+outputgreen <- merge(outputgreen, keygreen, by.x = "PID", by.y = "pid")
+```
+
+```{r}
+ggplot(outputfield, aes(x = treatment, y = tot.area, color = type)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Total leaf area consumed (cm2)", color = "Plant Type")
+```
+
+
+
+```{r}
+ggplot(outputgreen, aes(x = treatment, y = tot.area, color = type)) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  labs(x = "Treatment", y = "Total leaf area consumed (cm2)", color = "Plant Type")
+```
 
 
