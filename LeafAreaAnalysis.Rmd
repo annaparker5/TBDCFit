@@ -296,6 +296,12 @@ leafarea <- function(dataframe, output){
 
 
 ```{r}
+leafarea(dataframe = herbfield, output = outputfield)
+```
+
+
+
+```{r}
 leafarea(dataframe = herbgreen, output = outputgreen)
 ```
 
