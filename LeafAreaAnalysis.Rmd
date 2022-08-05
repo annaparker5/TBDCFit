@@ -206,4 +206,11 @@ ggplot(outputgreen, aes(x = treatment, y = tot.area, color = type)) +
   labs(x = "Treatment", y = "Total leaf area consumed (cm2)", color = "Plant Type")
 ```
 
+# 4. Export new leaf area files to use
+
+
+```{r}
+write.csv(x = outputfield, file = "~/Desktop/GitHub/TBDCFit/Data/FieldLeafArea.csv")
+write.csv(x = outputgreen, file = "~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv")
+```
 
