@@ -210,7 +210,7 @@ ggplot(outputgreen, aes(x = treatment, y = tot.area, color = type)) +
 
 
 ```{r}
-write.csv(x = outputfield, file = "~/Desktop/GitHub/TBDCFit/Data/FieldLeafArea.csv")
-write.csv(x = outputgreen, file = "~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv")
+write.csv(x = outputfield, file = "~/Desktop/GitHub/TBDCFit/Data/FieldLeafArea.csv", row.names = FALSE)
+write.csv(x = outputgreen, file = "~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv", row.names = FALSE)
 ```
 
