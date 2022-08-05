@@ -1,0 +1,211 @@
+---
+title: "Leaf Area Analysis 2022"
+output: html_notebook
+---
+
+This notebook gives the correct leaf area consumed calculations used on both the greenhouse and field data. 
+
+Roadmap: 
+
+0. Load in the data and packages
+1. Make the output file 
+2. Make the giant for loop
+3. Graph output for checking accuracy
+
+
+# 0. Load in the packages and data
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(sjmisc)
+```
+
+```{r}
+herbfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbCleaned2022.csv", header = TRUE)
+herbgreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenHerbAug4.csv", header = TRUE)
+
+keyfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+keygreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
+```
+
+# 1. Make the output file
+
+```{r}
+addedfield <- data.frame(date = "9/1", 
+                         cid = NA,
+                         pid = keyfield$pid, 
+                         num.leaf = NA, 
+                         position = NA, 
+                         exit = NA)
+
+herbfield <- rbind(herbfield, addedfield)
+
+outputfield <- data.frame(PID = unique(herbfield$pid), 
+                          tot.area = 0)
+
+outputfield <- outputfield %>%
+  arrange(PID)
+```
+
+```{r}
+addedgreen <- data.frame(date = "8/20", 
+                         pid = keygreen$pid, 
+                         num.leaf = NA, 
+                         position = NA, 
+                         exit = NA, 
+                         notes = NA)
+
+herbgreen <- rbind(herbgreen, addedgreen)
+
+outputgreen <- data.frame(PID = unique(keygreen$pid), 
+                          tot.area = 0)
+```
+
+# 2. Make the heinous for loop
+
+0. Subset by PID and order by leaf num
+1. Distinguish between end (NA) and non-end (Non-NA)
+2. Distinguish between higher leaf num and not 
+3. Distinguish between DC and TB (even/odd PID)
+4. Add appropriate leaf area to total running count if leaf num higher, otherwise add 0
+5. Input into output dataframe
+
+## Field
+
+```{r}
+for(i in (1:length(outputfield$PID))){
+  subset <- herbfield[herbfield$pid == i, ]
+  subset <- subset %>%
+    arrange(num.leaf)
+  value <- 0
+  
+  for(j in 1:length(subset$pid)){
+    if(is.na(subset[j+1, 4]) == FALSE){
+      if(subset[j+1, 4] > subset[j, 4]){
+        if(subset[j+1, 4] == (subset[j, 4] + 1)){
+          if(is_odd(subset[j, 3]) == TRUE){
+            if(subset[j, 5] == "T"){
+              value <- value + 50
+              } else 
+                if(subset[j, 5] == "M"){
+                  value <- value + 150
+                } else
+                  if(subset[j, 5] == "B"){
+                    value <- value + 200
+                  }
+            } else if(is_even(subset[j, 3]) == TRUE){
+            if(subset[j, 5] == "T"){
+              value <- value + 50
+              } else 
+                if(subset[j, 5] == "M"){
+                  value <- value + 125
+                } else
+                  if(subset[j, 5] == "B"){
+                    value <- value + 150
+                  }
+          }
+        } else if(subset[j+1, 4] > subset[j, 4] + 1){
+          if(is_odd(subset[j, 3]) == TRUE){
+            if(subset[j, 5] == "T"){
+              value <- value + (50 * (subset[j+1, 4] - subset[j, 4]))
+              } else 
+                if(subset[j, 5] == "M"){
+                  value <- value + (150 * (subset[j+1, 4] - subset[j, 4]))
+                } else
+                  if(subset[j, 5] == "B"){
+                    value <- value + (200 * (subset[j+1, 4] - subset[j, 4]))
+                  }
+          } else if(is_even(subset[j, 3]) == TRUE){
+            if(subset[j, 5] == "T"){
+              value <- value + (50 * (subset[j+1, 4] - subset[j, 4]))
+              } else 
+                if(subset[j, 5] == "M"){
+                  value <- value + (125 * (subset[j+1, 4] - subset[j, 4]))
+                } else
+                  if(subset[j, 5] == "B"){
+                    value <- value + (150 * (subset[j+1, 4] - subset[j, 4]))
+                  }
+          }
+        }
+      } else if(subset[j+1, 4] <= subset[j, 4]){
+        value <- value + 0
+      }
+    } else if(is.na(subset[j+1, 4]) == TRUE){
+      value <- value
+    }
+  }
+  outputfield[i, 2] <- value
+}
+```
+
+
+## Greenhouse
+
+```{r}
+for(i in (1:length(outputgreen$PID))){
+  subsetg <- herbgreen[herbgreen$pid == i, ]
+  subsetg <- subsetg %>%
+    arrange(num.leaf)
+  valueg <- 0
+  
+  for(j in 1:length(subsetg$pid)){
+    if(is.na(subsetg[j+1, 3]) == FALSE){
+      if(subsetg[j+1, 3] > subsetg[j, 3]){
+        if(subsetg[j+1, 3] == (subsetg[j, 3] + 1)){
+          if(is_odd(subsetg[j, 2]) == TRUE){
+            if(subsetg[j, 4] == "T"){
+              valueg <- valueg + 50
+              } else 
+                if(subsetg[j, 4] == "M"){
+                  valueg <- valueg + 150
+                } else
+                  if(subsetg[j, 4] == "B"){
+                    valueg <- valueg + 200
+                  }
+            } else if(is_even(subsetg[j, 2]) == TRUE){
+            if(subsetg[j, 4] == "T"){
+              valueg <- valueg + 50
+              } else 
+                if(subsetg[j, 4] == "M"){
+                  valueg <- valueg + 125
+                } else
+                  if(subsetg[j, 4] == "B"){
+                    valueg <- valueg + 150
+                  }
+          }
+        } else if(subsetg[j+1, 3] > subsetg[j, 3] + 1){
+          if(is_odd(subsetg[j, 2]) == TRUE){
+            if(subsetg[j, 4] == "T"){
+              valueg <- valueg + (50 * (subsetg[j+1, 3] - subsetg[j, 3]))
+              } else 
+                if(subsetg[j, 4] == "M"){
+                  valueg <- valueg + (150 * (subsetg[j+1, 3] - subsetg[j, 3]))
+                } else
+                  if(subsetg[j, 4] == "B"){
+                    valueg <- valueg + (200 * (subsetg[j+1, 3] - subsetg[j, 3]))
+                  }
+          } else if(is_even(subsetg[j, 2]) == TRUE){
+            if(subsetg[j, 4] == "T"){
+              valueg <- valueg + (50 * (subsetg[j+1, 3] - subsetg[j, 3]))
+              } else 
+                if(subsetg[j, 4] == "M"){
+                  valueg <- valueg + (125 * (subsetg[j+1, 3] - subsetg[j, 3]))
+                } else
+                  if(subsetg[j, 4] == "B"){
+                    valueg <- valueg + (150 * (subsetg[j+1, 3] - subsetg[j, 3]))
+                  }
+          }
+        }
+      } else if(subsetg[j+1, 3] <= subsetg[j, 3]){
+        valueg <- valueg + 0
+      }
+    } else if(is.na(subsetg[j+1, 3]) == TRUE){
+      valueg <- valueg
+    }
+  }
+  outputgreen[i, 2] <- valueg
+}
+```
+
+
