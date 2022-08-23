@@ -1,0 +1,85 @@
+---
+title: "Floral Count Analysis"
+output: html_notebook
+---
+
+This script will calculate the total number of flowers pollinated on each plant for the entirety of both the field and greenhouse studies. 
+
+Roadmap: 
+
+0. Load in the data
+1. Select relevant columns and create output file
+2. Write a for loop to add floral number by PID
+3. Create an output csv
+
+# 0. Load in the data 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(Rmisc)
+```
+
+
+```{r}
+pollfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pollination.csv", header = TRUE)
+keyfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+```
+
+# 1. Select relevant columns 
+
+```{r}
+pollfield <- pollfield %>%
+  select(date, pid = PID, num.flowers)
+
+pollfield <- pollfield[is.na(pollfield$num.flowers) == FALSE, ]
+
+keyfield <- keyfield %>%
+  select(pid, type, treatment)
+  
+```
+
+## Create an output file
+
+```{r}
+outputfield <- data.frame(
+  pid = unique(keyfield$pid),
+  tot.flowers = 0
+)
+
+outputfield <- outputfield %>%
+  arrange(pid)
+```
+
+# 2. Write the for loop 
+
+1. Subset pollination data by PID
+2. Take the sum of the num.flowers column
+3. Stick that sum in the output file
+
+```{r}
+flowernum <- function(dataframe, output){
+  
+  for(i in 1:length(output$pid)){
+    k <- output[i, 1]
+    subset <- dataframe[dataframe$pid == k, ]
+    output[i, 2] <- sum(subset$num.flowers)
+  }
+   return(output)
+}
+```
+
+## Run the function
+
+```{r}
+outputfield <- flowernum(dataframe = pollfield, output = outputfield)
+```
+
+
+# 3. Write to CSV 
+
+
+```{r}
+write.csv(x = outputfield, file = "~/Desktop/GitHub/TBDCFit/Data/FieldNumFlowers.csv", row.names = FALSE)
+```
+
