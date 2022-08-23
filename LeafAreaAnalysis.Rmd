@@ -23,7 +23,7 @@ library(sjmisc)
 
 ```{r}
 herbfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/HerbCleaned2022.csv", header = TRUE)
-herbgreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenHerbAug4.csv", header = TRUE)
+herbgreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenHerbAug23.csv", header = TRUE)
 
 keyfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
 keygreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
