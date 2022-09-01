@@ -175,7 +175,6 @@ comb$stand.seed.set <- paste(comb$stand.seed.x, comb$stand.seed.y, sep = "")
 comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
 ```
 
-
 Remove plants where they didn't have any seeds
 
 ```{r}
