@@ -14,7 +14,7 @@ Contents:
 3. % plants with mature pods
   - extract which plants had any pods from final pod datasheet
 4. # pods / plant
-  - take the mean of those with mature podsd by trt and type
+  - take the mean of those with mature pods by trt and type
 5. #/mass of seeds / pod
   - take the mean of those by trt and type
 6. % seeds germinated
@@ -79,7 +79,7 @@ foutput <- data.frame(metric = metrics,
 
 # 2. Go through each metric
 
-## Percent flowers
+## 1. Percent flowers
 
 Datafile: output of for loop (fflowers), key (fkey)
 Approach: Create binary column, subset by Trt+Type, take number of 1s over total number
@@ -144,7 +144,7 @@ foutput[1, 15] <- fflowperc[7, 2]
 foutput[1, 17] <- fflowperc[8, 2]
 ```
 
-## Number of flowers per plant
+## 2. Number of flowers per plant
 
 Data: output of total flowers (fflowers)
 Approach: subset by those that flowered, then summarySE 
@@ -279,9 +279,115 @@ foutput[4, 18] <- ftotpod[8, 5]
 
 ```
 
+## 5. Amount of seeds per pod - COME BACK TO THIS
+
+Data: fTBseed, fDCseed, fkey
+Approach: Exclude those without pods or that we couldn't measure, use fitness code to get average seed mass/number per plant, then use summarySE to get by treatment group
+
+Exclude those without pods: 
+
+```{r}
+fTBseed <- fTBseed[fTBseed$pid != 23, ]
+fTBseed <- fTBseed[fTBseed$pid != 141, ]
 
 
+fDCseed <- fDCseed[fDCseed$pid != 78, ]
+fDCseed <- fDCseed[fDCseed$pid != 140, ]
+```
 
+
+```{r}
+fTBseed <- fTBseed[fTBseed$mature != "no", ]
+```
+
+**Take seed pod mass off of each individual, then average**
+
+```{r}
+
+```
+
+## 6. Percent germination 
+
+Data: fgerm, fkey
+Approach: summarySE
+
+```{r}
+fgerm <- merge(fgerm, fkey, by = "pid")
+
+fgerm$composite <- paste(fgerm$type, fgerm$treatment, sep = " ")
+```
+
+
+```{r}
+fgermperc <- summarySE(data = fgerm, 
+                       measurevar = "prop.sprouted", 
+                       groupvars = "composite")
+
+
+```
+
+Input into summary table
+
+```{r}
+foutput[6, 2] <- sum(fgermperc$N)
+
+foutput[6, 3] <- fgermperc[1, 3]
+foutput[6, 4] <- fgermperc[1, 5]
+foutput[6, 5] <- fgermperc[2, 3]
+foutput[6, 6] <- fgermperc[2, 5]
+foutput[6, 7] <- fgermperc[3, 3]
+foutput[6, 8] <- fgermperc[3, 5]
+foutput[6, 9] <- fgermperc[4, 3]
+foutput[6, 10] <- fgermperc[4, 5]
+foutput[6, 11] <- fgermperc[5, 3]
+foutput[6, 12] <- fgermperc[5, 5]
+foutput[6, 13] <- fgermperc[6, 3]
+foutput[6, 14] <- fgermperc[6, 5]
+foutput[6, 15] <- fgermperc[7, 3]
+foutput[6, 16] <- fgermperc[7, 5]
+foutput[6, 17] <- fgermperc[8, 3]
+foutput[6, 18] <- fgermperc[8, 5]
+```
+
+## 7. Leaf Area
+Data: farea
+Approach: summarySE
+
+```{r}
+farea$composite <- paste(farea$type, farea$treatment, sep = " ")
+```
+
+
+```{r}
+ftotarea <- summarySE(data = farea, 
+                       measurevar = "tot.area", 
+                       groupvars = "composite")
+
+
+```
+
+Input into summary table
+
+```{r}
+foutput[7, 2] <- 168
+
+foutput[7, 3] <- ftotarea[1, 3]
+foutput[7, 4] <- ftotarea[1, 5]
+foutput[7, 5] <- ftotarea[2, 3]
+foutput[7, 6] <- ftotarea[2, 5]
+foutput[7, 7] <- ftotarea[3, 3]
+foutput[7, 8] <- ftotarea[3, 5]
+foutput[7, 9] <- ftotarea[4, 3]
+foutput[7, 10] <- ftotarea[4, 5]
+foutput[7, 11] <- ftotarea[5, 3]
+foutput[7, 12] <- ftotarea[5, 5]
+foutput[7, 13] <- ftotarea[6, 3]
+foutput[7, 14] <- ftotarea[6, 5]
+foutput[7, 15] <- ftotarea[7, 3]
+foutput[7, 16] <- ftotarea[7, 5]
+foutput[7, 17] <- ftotarea[8, 3]
+foutput[7, 18] <- ftotarea[8, 5]
+```
 
 ```{r}
 write.csv(x = comb, file = "~/Desktop/GitHub/TBDCFit/Data/FieldSeedSummary.csv", row.names = FALSE)
