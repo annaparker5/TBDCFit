@@ -8,9 +8,10 @@ This notebook gives the correct leaf area consumed calculations used on both the
 Roadmap: 
 
 0. Load in the data and packages
-1. Make the output file 
-2. Make the giant for loop
-3. Graph output for checking accuracy
+1. Get the correct leaf area conversions from greenhouse data 
+2. Make the output file 
+3. Make the giant for loop
+4. Graph output for checking accuracy
 
 
 # 0. Load in the packages and data
@@ -27,9 +28,34 @@ herbgreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenHerbAug23.c
 
 keyfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
 keygreen <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
+
+conversion <- read.csv("~/Desktop/Github/TBDCFit/Data/ScanValues2022.csv", header = TRUE)
 ```
 
-# 1. Make the output file
+# 1. Get the conversion values
+
+Output file:
+
+```{r}
+conversionoutput <- data.frame(type = c("DC", "DC", "DC", "TB", "TB", "TB"), 
+                               position = c("B", "M", "T", "B", "M", "T"), 
+                               area = 0)
+```
+
+
+Coding the averages:
+
+```{r}
+conversionoutput[1, 3] <- mean(conversion[conversion$plant.type == "DC" & conversion$position == "B", 6])
+conversionoutput[2, 3] <- mean(conversion[conversion$plant.type == "DC" & conversion$position == "M", 6])
+conversionoutput[3, 3] <- mean(conversion[conversion$plant.type == "DC" & conversion$position == "T", 6])
+conversionoutput[4, 3] <- mean(conversion[conversion$plant.type == "TB" & conversion$position == "B", 6])
+conversionoutput[5, 3] <- mean(conversion[conversion$plant.type == "TB" & conversion$position == "M", 6])
+conversionoutput[6, 3] <- mean(conversion[conversion$plant.type == "TB" & conversion$position == "T", 6])
+```
+
+
+# 2. Make the output file
 
 ```{r}
 addedfield <- data.frame(date = "9/1", 
@@ -88,7 +114,7 @@ herbgreen <- herbgreen %>%
 THIS WORKS NOW
 
 ```{r}
-leafarea <- function(dataframe, output){
+leafarea <- function(dataframe, areas, output){
   
   for(i in (1:length(output$PID))){
     k <- output[i, 1]
@@ -105,45 +131,45 @@ leafarea <- function(dataframe, output){
         if(subset[j+1, 4] == (subset[j, 4] + 1)){
           if(is_odd(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
-              value <- value + 50
+              value <- value + areas[6, 3]
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + 200
+                  value <- value + areas[5, 3]
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + 250
+                    value <- value + areas[4, 3]
                   }
             } else if(is_even(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
-              value <- value + 50
+              value <- value + areas[3, 3]
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + 125
+                  value <- value + areas[2, 3]
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + 150
+                    value <- value + areas[1, 3]
                   }
           }
         } else if(subset[j+1, 4] > subset[j, 4] + 1){
           if(is_odd(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
-              value <- value + (50 * (subset[j+1, 4] - subset[j, 4]))
+              value <- value + (areas[6, 3] * (subset[j+1, 4] - subset[j, 4]))
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + (200 * (subset[j+1, 4] - subset[j, 4]))
+                  value <- value + (areas[5, 3] * (subset[j+1, 4] - subset[j, 4]))
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + (250 * (subset[j+1, 4] - subset[j, 4]))
+                    value <- value + (areas[4, 3] * (subset[j+1, 4] - subset[j, 4]))
                   }
           } else if(is_even(subset[j, 3]) == TRUE){
             if(subset[j, 5] == "T"){
-              value <- value + (50 * (subset[j+1, 4] - subset[j, 4]))
+              value <- value + (areas[3, 3] * (subset[j+1, 4] - subset[j, 4]))
               } else 
                 if(subset[j, 5] == "M"){
-                  value <- value + (125 * (subset[j+1, 4] - subset[j, 4]))
+                  value <- value + (areas[2, 3] * (subset[j+1, 4] - subset[j, 4]))
                 } else
                   if(subset[j, 5] == "B"){
-                    value <- value + (150 * (subset[j+1, 4] - subset[j, 4]))
+                    value <- value + (areas[1, 3] * (subset[j+1, 4] - subset[j, 4]))
                   }
           }
         }
@@ -163,12 +189,12 @@ leafarea <- function(dataframe, output){
 
 
 ```{r}
-outputfield <- leafarea(dataframe = herbfield, output = outputfield)
+outputfield <- leafarea(dataframe = herbfield, areas = conversionoutput, output = outputfield)
 ```
 
 
 ```{r}
-outputgreen <- leafarea(dataframe = herbgreen, output = outputgreen)
+outputgreen <- leafarea(dataframe = herbgreen, areas = conversionoutput, output = outputgreen)
 ```
 
 
