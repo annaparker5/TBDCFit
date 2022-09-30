@@ -18,13 +18,13 @@ area <- read.csv("~/Desktop/GitHub/TBDCFit/Data/FieldLeafArea.csv", header = TRU
 germ <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
 key <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
 pods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
-TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeed.csv", header = TRUE)
+TBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeedCorrect.csv", header = TRUE)
 DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
 ```
 
 ## 1. Get seed set per plant
 
-
+**NOT DOING LINES 30-38**
 Remove the individuals that had mature pods that we couldn't measure due to damage/mold
 
 ```{r}
@@ -37,17 +37,43 @@ pods <- pods[pods$PID != 23, ]
 pods <- pods[pods$PID != 141, ]
 ```
 
-Remove unneeded rows from TBseed and pods
-
-```{r}
-TBseed <- TBseed %>%
-  select(pid, mature, kept, pod.avg, holes.)
-```
+Remove unneeded rows from  pods
 
 ```{r}
 pods <- pods %>%
   select(PID, num.pod.m)
 ```
+
+Make a binary column for holes in TB pods
+
+```{r}
+TBseed$binary <- 0
+```
+
+```{r}
+for(i in 1:length(TBseed$PID)){
+  if(TBseed[i, 3] > 0){
+    TBseed[i, 5] <- 1
+  } else if(TBseed[i, 3] <= 0){
+    TBseed[i, 5] <- 0
+  }
+}
+
+```
+
+Seed mass per TB pod 
+
+```{r}
+TBseed$massperpod <- TBseed$Mass..g. / TBseed$Total.Pods
+```
+
+Remove unnecessary columns fromm TBseed
+
+```{r}
+TBseed <- TBseed %>%
+  select(PID, binary, massperpod)
+```
+
 
 ### Write a for loop to get avg seed number per pod for DC
 
