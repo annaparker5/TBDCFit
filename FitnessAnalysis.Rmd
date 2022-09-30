@@ -24,19 +24,6 @@ DCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
 
 ## 1. Get seed set per plant
 
-**NOT DOING LINES 30-38**
-Remove the individuals that had mature pods that we couldn't measure due to damage/mold
-
-```{r}
-TBseed <- TBseed[TBseed$pid != 23, ]
-TBseed <- TBseed[TBseed$pid != 141, ]
-```
-
-```{r}
-pods <- pods[pods$PID != 23, ]
-pods <- pods[pods$PID != 141, ]
-```
-
 Remove unneeded rows from  pods
 
 ```{r}
@@ -137,7 +124,7 @@ key <- key %>%
 DCseedout <- merge(DCseedout, key, by = "pid")
 
 DCseedout <- DCseedout %>%
-  select(pid, type, treatment, tot.seed.set)
+  select(pid, type, treatment, column, tot.seed.set)
 
 DCseedCON <- DCseedout[DCseedout$treatment == "CON", ]
 
@@ -150,7 +137,7 @@ medianDC <- median(DCseedCON$tot.seed.set)
 TBseed <- merge(TBseed, key, by.x = "PID", by.y = "pid")
 
 TBseed <- TBseed %>%
-  select(PID, type, treatment, binary, tot.seed.set)
+  select(PID, type, treatment, column, binary, tot.seed.set)
 
 TBseedCON <- TBseed[TBseed$treatment == "CON", ]
 
@@ -172,10 +159,14 @@ germ <- germ %>%
   select(pid, prop.sprouted)
 
 comb <- merge(area, germ, by.x = "PID", by.y = "pid")
-comb <- merge(comb, pods, by = "PID")
+#comb <- merge(comb, pods, by = "PID")
 
-comb <- merge(comb, DCseedout, by.x = c("PID", "treatment", "type", "column"), by.y = c("pid", "treatment", "type", "column"), all.x = TRUE)
-comb <- merge(comb, TBseed, by.x = c("PID", "treatment", "type", "column"), by.y = c("PID", "treatment", "type", "column"), all.x = TRUE)
+comb <- merge(comb, DCseedout, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"), all.x = TRUE)
+comb <- merge(comb, TBseed, by = c("PID", "treatment", "type"), all.x = TRUE)
+
+comb$column <- paste(comb$column.x, comb$column.y, sep = "")
+comb$column <- gsub("NA", "", comb$column)
+
 
 comb$stand.seed.set <- paste(comb$stand.seed.x, comb$stand.seed.y, sep = "")
 comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
@@ -200,9 +191,8 @@ comb2 <- comb[comb$prop.sprouted > 0, ]
 comb2$stand.seed.set <- as.numeric(comb2$stand.seed.set)
 comb2$ln.stand.seed.set <- log(comb2$stand.seed.set)
 
-comb2$rel.fitness <- comb$prop.sprouted * comb$ln.stand.seed.set
+comb2$rel.fitness <- comb2$prop.sprouted * comb2$ln.stand.seed.set
 ```
-
 
 ## 4. Graph! 
 
