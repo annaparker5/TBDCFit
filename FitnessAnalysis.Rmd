@@ -44,6 +44,14 @@ pods <- pods %>%
   select(PID, num.pod.m)
 ```
 
+Exclude any pods that matured later/had no mature pods
+
+```{r}
+pods <- pods[pods$num.pod.m != 0, ]
+```
+
+
+
 Make a binary column for holes in TB pods
 
 ```{r}
@@ -64,14 +72,14 @@ for(i in 1:length(TBseed$PID)){
 Seed mass per TB pod 
 
 ```{r}
-TBseed$massperpod <- TBseed$Mass..g. / TBseed$Total.Pods
+TBseed$mass.per.pod <- TBseed$Mass..g. / TBseed$Total.Pods
 ```
 
 Remove unnecessary columns fromm TBseed
 
 ```{r}
 TBseed <- TBseed %>%
-  select(PID, binary, massperpod)
+  select(PID, binary, mass.per.pod)
 ```
 
 
@@ -95,40 +103,11 @@ for(i in 1:length(DCpid)){
 }
 ```
 
-### Remove DC where we couldn't find pods / pods rotten
-
-```{r}
-DCseedout <- DCseedout[DCseedout$pid != 78, ]
-DCseedout <- DCseedout[DCseedout$pid != 140, ]
-```
-
-### Remove pods with spodoptera damage
-
-```{r}
-TBseed <- TBseed[TBseed$holes. != "yes", ]
-```
-
-### Remove TB plants without mature seeds
-
-```{r}
-TBseed <- TBseed[complete.cases(TBseed[, 4]), ]
-```
-
-### Convert TB pod masses to seed masses
-
-```{r}
-TBseed$seed.avg <- TBseed$pod.avg - 82.9 ##average mass of seed pod husk from 5/30
-TBseed <- TBseed[TBseed$seed.avg > 0,  ]
-
-TBseed <- TBseed %>%
-  select(pid, seed.avg)
-```
-
 
 ## 2. Get standardized seed set metric
 
 1. Multiply avg seed set per plant by number of mature pods produced
-2. Get mean of control group seed set by each  plant type
+2. Get median of control group seed set by each plant type
 3. Divide each individual by that mean 
 4. Combine into one dataset 
 
@@ -137,10 +116,20 @@ TBseed <- TBseed %>%
 
 ```{r}
 DCseedout <- merge(DCseedout, pods, by.x = "pid", by.y = "PID")
-TBseed <- merge(TBseed, pods, by.x = "pid", by.y = "PID")
+TBseed <- merge(TBseed, pods, by.x = "PID", by.y = "PID")
 
 DCseedout$tot.seed.set <- DCseedout$pod.avg * DCseedout$num.pod.m
-TBseed$tot.seed.set <- TBseed$seed.avg * TBseed$num.pod.m
+TBseed$tot.seed.set <- TBseed$mass.per.pod * TBseed$num.pod.m
+```
+
+
+### Step 2
+
+Select correct columns from key
+
+```{r}
+key <- key %>%
+  select(pid, type, treatment, column)
 ```
 
 
@@ -148,7 +137,7 @@ TBseed$tot.seed.set <- TBseed$seed.avg * TBseed$num.pod.m
 DCseedout <- merge(DCseedout, key, by = "pid")
 
 DCseedout <- DCseedout %>%
-  select(pid, treatment, tot.seed.set)
+  select(pid, type, treatment, tot.seed.set)
 
 DCseedCON <- DCseedout[DCseedout$treatment == "CON", ]
 
@@ -158,10 +147,10 @@ medianDC <- median(DCseedCON$tot.seed.set)
 
 
 ```{r}
-TBseed <- merge(TBseed, key, by = "pid")
+TBseed <- merge(TBseed, key, by.x = "PID", by.y = "pid")
 
 TBseed <- TBseed %>%
-  select(pid, treatment, tot.seed.set)
+  select(PID, type, treatment, binary, tot.seed.set)
 
 TBseedCON <- TBseed[TBseed$treatment == "CON", ]
 
@@ -169,8 +158,6 @@ medianTB <- median(TBseedCON$tot.seed.set)
 
 ```
 
-
-### Step 2
 
 ```{r}
 DCseedout$stand.seed <- DCseedout$tot.seed.set / medianDC
@@ -181,27 +168,20 @@ TBseed$stand.seed <- TBseed$tot.seed.set / medianTB
 ## 3. Combine everything together
 
 ```{r}
-key <- key %>%
-  select(pid, treatment, column)
-
-area <- merge(area, key, by.x = c("PID", "treatment"), by.y = c("pid", "treatment"))
-```
-
-```{r}
 germ <- germ %>%
-  select(pid, flat, num.seeds, prop.sprouted)
+  select(pid, prop.sprouted)
 
 comb <- merge(area, germ, by.x = "PID", by.y = "pid")
 comb <- merge(comb, pods, by = "PID")
 
-comb <- merge(comb, DCseedout, by.x = c("PID", "treatment"), by.y = c("pid", "treatment"), all.x = TRUE)
-comb <- merge(comb, TBseed, by.x = c("PID", "treatment"), by.y = c("pid", "treatment"), all.x = TRUE)
+comb <- merge(comb, DCseedout, by.x = c("PID", "treatment", "type", "column"), by.y = c("pid", "treatment", "type", "column"), all.x = TRUE)
+comb <- merge(comb, TBseed, by.x = c("PID", "treatment", "type", "column"), by.y = c("PID", "treatment", "type", "column"), all.x = TRUE)
 
 comb$stand.seed.set <- paste(comb$stand.seed.x, comb$stand.seed.y, sep = "")
 comb$stand.seed.set <- gsub("NA", "", comb$stand.seed.set)
 ```
 
-Remove plants where they didn't have any seeds
+Remove plants where we germinated seeds from immature pods
 
 ```{r}
 comb <- comb[comb$stand.seed.set > 0, ]
@@ -210,25 +190,24 @@ comb <- comb[comb$stand.seed.set > 0, ]
 Remove plants that didn't germinate at all **ASK BECKY**
 
 ```{r}
-comb <- comb[comb$prop.sprouted > 0, ]
+comb2 <- comb[comb$prop.sprouted > 0, ]
 ```
 
 
 ### Calculate fitness: 
 
 ```{r}
-comb$stand.seed.set <- as.numeric(comb$stand.seed.set)
-comb$ln.stand.seed.set <- log(comb$stand.seed.set)
+comb2$stand.seed.set <- as.numeric(comb2$stand.seed.set)
+comb2$ln.stand.seed.set <- log(comb2$stand.seed.set)
 
-comb$rel.fitness <- comb$prop.sprouted * comb$ln.stand.seed.set
+comb2$rel.fitness <- comb$prop.sprouted * comb$ln.stand.seed.set
 ```
 
 
 ## 4. Graph! 
 
-
 ```{r}
-fieldfitnessplot <- ggplot(data = comb, aes(x = tot.area, y = rel.fitness)) + 
+fieldfitnessplot <- ggplot(data = comb2, aes(x = tot.area, y = rel.fitness)) + 
   geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
   geom_point(aes(shape = type,  color = treatment)) + 
@@ -242,6 +221,9 @@ fieldfitnessplot
 
 ```
 
+
+
+
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/fieldfitnessherb.png", fieldfitnessplot, width = 8, height = 5)
 ```
@@ -249,7 +231,7 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/fieldfitnessherb.png", fieldfitnessplot
 ## 5. Stats! 
 
 ```{r}
-fieldfitmod <- lmer(rel.fitness ~ tot.area*type + (1|column), data = comb)
+fieldfitmod <- lmer(rel.fitness ~ tot.area*type + (1|column), data = comb2)
 
 summary(fieldfitmod)
 ```
