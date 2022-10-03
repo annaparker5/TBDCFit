@@ -199,11 +199,11 @@ comb2$rel.fitness <- comb2$prop.sprouted * comb2$ln.stand.seed.set
 ```{r}
 fieldfitnessplot <- ggplot(data = comb2, aes(x = tot.area, y = rel.fitness)) + 
   geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
-  scale_linetype_manual(values = c("solid", "dotdash")) + 
+  scale_linetype_manual(values = c("dotdash", "solid")) + 
   geom_point(aes(shape = type,  color = treatment)) + 
   theme_bw() + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(16, 5)) + 
+  scale_shape_manual(values = c(1, 16)) + 
   labs(x = expression(paste("Leaf area consumed ", (cm^{2}))), y = "Relative fitness", color = "Treatment group",
        shape = "Hostplant", linetype = "Hostplant")
 
