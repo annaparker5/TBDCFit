@@ -24,6 +24,7 @@ library(Rmisc)
 ```{r}
 pollfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pollination.csv", header = TRUE)
 keyfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+exitfield <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
 ```
 
 # 1. Select relevant columns 
@@ -36,6 +37,11 @@ pollfield <- pollfield[is.na(pollfield$num.flowers) == FALSE, ]
 
 keyfield <- keyfield %>%
   select(pid, type, treatment)
+
+exitfield <- exitfield %>%
+  select(pid = PID, num.flower.unpol)
+
+exitfield[exitfield$pid == 30, 2] <- 0
   
 ```
 
@@ -74,6 +80,18 @@ flowernum <- function(dataframe, output){
 ```{r}
 outputfield <- flowernum(dataframe = pollfield, output = outputfield)
 ```
+
+## Merge with ending exit data - number of unpollinated flowers
+
+```{r}
+outputfield <- merge(outputfield, exitfield, by = "pid")
+
+outputfield$tot.flowers <- outputfield$tot.flowers + outputfield$num.flower.unpol
+
+outputfield <- outputfield %>%
+  select(pid, tot.flowers)
+```
+
 
 
 # 3. Write to CSV 
