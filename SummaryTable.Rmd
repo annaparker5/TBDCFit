@@ -228,7 +228,7 @@ for(i in 1:length(uniquecomp)){
 }
 ```
 
-put in outtput table
+put in output table
 
 
 ```{r}
@@ -283,17 +283,6 @@ foutput[4, 18] <- ftotpod[8, 5]
 
 Data: fTBseed, fDCseed, fkey
 Approach: Exclude those without pods or that we couldn't measure, use fitness code to get average seed mass/number per plant, then use summarySE to get by treatment group
-
-Exclude those without pods: 
-
-```{r}
-#fTBseed <- fTBseed[fTBseed$pid != 23, ]
-#fTBseed <- fTBseed[fTBseed$pid != 141, ]
-
-
-fDCseed <- fDCseed[fDCseed$pid != 78, ]
-fDCseed <- fDCseed[fDCseed$pid != 140, ]
-```
 
 **Take seed pod mass off of each individual, then average**
 
@@ -351,7 +340,7 @@ for(i in 1:length(fDCpid)){
 **Combine datafiles**
 
 ```{r}
-fDCseedout$binary <- 0
+fDCseedout$binary <- 0 #just adding in because none hadd spodoptera damage
 
 fDCseedout <- fDCseedout %>%
   select(pid, binary, per.pod = pod.avg)
