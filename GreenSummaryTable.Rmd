@@ -143,3 +143,65 @@ goutput[1, 13] <- gflowperc[6, 2]
 goutput[1, 15] <- gflowperc[7, 2]
 goutput[1, 17] <- gflowperc[8, 2]
 ```
+
+## 3. Percent with mature pods
+
+Data: pods datasheets (gpods) + key (gkey)
+Approach: get rid of misc columns, create binary, calculate percentage 
+
+```{r}
+gpods <- gpods %>%
+  select(pid, num.pods.m)
+
+gpods <- merge(gpods, gkey, by.x = "pid", by.y = "pid")
+
+gpods$binary <- 0
+
+gpods$composite <- paste(gpods$type, gpods$treatment, sep = " ")
+
+
+```
+
+```{r}
+for(i in 1:length(gpods$pid)){
+  if(gpods[i, 2] > 0){
+    gpods[i, 5] <- 1
+  } else if(gpods[i, 2] <= 0){
+    gpods[i, 5] <- 0
+  }
+}
+
+```
+
+for loop for getting pod counts
+
+
+```{r}
+gpodperc <- data.frame(composite = unique(gpods$composite), 
+                        perc = 0)
+
+gpodperc <- gpodperc[order(gpodperc$composite), ]
+
+for(i in 1:length(uniquecomp)){
+  k <- uniquecomp[[i]]
+  subset <- gpods[gpods$composite == k, ]
+  #print(subset)
+  gpodperc[gpodperc$composite == k, 2] <- (sum(subset$binary)) / (length(subset$binary))
+}
+```
+put in output table
+
+
+```{r}
+goutput[3, 2] <- 80
+
+goutput[3, 3] <- gpodperc[1, 2]
+goutput[3, 5] <- gpodperc[2, 2]
+goutput[3, 7] <- gpodperc[3, 2]
+goutput[3, 9] <- gpodperc[4, 2]
+goutput[3, 11] <- gpodperc[5, 2]
+goutput[3, 13] <- gpodperc[6, 2]
+goutput[3, 15] <- gpodperc[7, 2]
+goutput[3, 17] <- gpodperc[8, 2]
+```
+
