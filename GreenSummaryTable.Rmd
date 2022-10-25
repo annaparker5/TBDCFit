@@ -42,7 +42,7 @@ library(ggplot2)
 
 ```{r}
 garea <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv", header = TRUE)
-#ggerm <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GermCollated.csv", header = TRUE)
+ggerm <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenGermCollated.csv", header = TRUE)
 gkey <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
 gpods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenExitData.csv", header = TRUE)
 gTBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenTBSeed.csv", header = TRUE)
@@ -390,6 +390,49 @@ goutput[5, 15] <- gperpodsum[7, 3]
 goutput[5, 16] <- gperpodsum[7, 5]
 goutput[5, 17] <- gperpodsum[8, 3]
 goutput[5, 18] <- gperpodsum[8, 5]
+```
+
+## 6. Percent germination 
+
+Data: ggerm, gkey
+Approach: summarySE
+
+```{r}
+ggerm <- merge(ggerm, gkey, by = "pid")
+
+ggerm$composite <- paste(ggerm$type, ggerm$treatment, sep = " ")
+```
+
+
+```{r}
+ggermperc <- summarySE(data = ggerm, 
+                       measurevar = "prop.sprouted", 
+                       groupvars = "composite")
+
+
+```
+
+Input into summary table
+
+```{r}
+goutput[6, 2] <- sum(ggermperc$N)
+
+goutput[6, 3] <- ggermperc[1, 3]
+goutput[6, 4] <- ggermperc[1, 5]
+goutput[6, 5] <- ggermperc[2, 3]
+goutput[6, 6] <- ggermperc[2, 5]
+goutput[6, 7] <- ggermperc[3, 3]
+goutput[6, 8] <- ggermperc[3, 5]
+goutput[6, 9] <- ggermperc[4, 3]
+goutput[6, 10] <- ggermperc[4, 5]
+goutput[6, 11] <- ggermperc[5, 3]
+goutput[6, 12] <- ggermperc[5, 5]
+goutput[6, 13] <- ggermperc[6, 3]
+goutput[6, 14] <- ggermperc[6, 5]
+goutput[6, 15] <- ggermperc[7, 3]
+goutput[6, 16] <- ggermperc[7, 5]
+goutput[6, 17] <- ggermperc[8, 3]
+goutput[6, 18] <- ggermperc[8, 5]
 ```
 
 ## 7. Leaf Area
