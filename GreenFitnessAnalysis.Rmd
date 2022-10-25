@@ -175,6 +175,88 @@ gcomb$ln.stand.seed.set <- log(gcomb$stand.seed.set)
 gcomb$rel.fitness <- gcomb$prop.sprouted * gcomb$ln.stand.seed.set
 ```
 
+# 4. Graph!
+
+```{r}
+greenfitnessplot <- ggplot(data = gcomb, aes(x = tot.area, y = rel.fitness)) + 
+  theme_bw() + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
+  scale_linetype_manual(values = c("dotdash", "solid")) + 
+  geom_point(aes(shape = type,  color = treatment)) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = expression(paste("Leaf area consumed ", (cm^{2}))), y = "Relative fitness", color = "Treatment group",
+       shape = "Hostplant", linetype = "Hostplant")
+
+greenfitnessplot
+
+```
 
 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/greenfitnessherb.png", greenfitnessplot, width = 8, height = 5)
+```
+
+
+
+```{r}
+greenseedsetplot <- ggplot(data = gcomb, aes(x = tot.area, y = ln.stand.seed.set)) + 
+  theme_bw() + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
+  scale_linetype_manual(values = c("dotdash", "solid")) + 
+  geom_point(aes(shape = type,  color = treatment)) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = expression(paste("Leaf area consumed ", (cm^{2}))), y = "Standardized seed set", color = "Treatment group",
+       shape = "Hostplant", linetype = "Hostplant")
+
+greenseedsetplot
+
+```
+
+```{r}
+greengermplot <- ggplot(data = gcomb, aes(x = tot.area, y = prop.sprouted)) + 
+  theme_bw() + 
+  geom_smooth(aes(linetype = type), color = "black", method = "lm", alpha = 0.2) + 
+  scale_linetype_manual(values = c("dotdash", "solid")) + 
+  geom_point(aes(shape = type,  color = treatment)) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = expression(paste("Leaf area consumed ", (cm^{2}))), y = "Proportion germinated", color = "Treatment group",
+       shape = "Hostplant", linetype = "Hostplant") +
+  ylim(0, 1)
+
+greengermplot
+
+```
+
+# 5. Fitness stats
+
+
+```{r}
+greenfitmod <- lmer(rel.fitness ~ tot.area*type + (1|column), data = gcomb)
+
+summary(greenfitmod)
+```
+
+
+```{r}
+greenseedsetmod <- lmer(ln.stand.seed.set ~ tot.area*type + (1|column), data = gcomb)
+
+summary(greenseedsetmod)
+```
+
+
+```{r}
+greengermmod <- glmer(prop.sprouted ~ tot.area*type + (1|column), data = gcomb, family = "binomial")
+
+summary(greengermmod)
+```
+
+
+```{r}
+greengermmod2 <- glm(prop.sprouted ~ tot.area*type, data = gcomb, family = "binomial")
+
+summary(greengermmod2)
+```
 
