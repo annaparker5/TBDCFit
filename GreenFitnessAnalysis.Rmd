@@ -1,0 +1,180 @@
+---
+title: "Greenhouse Fitness Analysis"
+output: html_notebook
+---
+
+
+This script calculates fitness for the greenhouse experiment. 
+
+Roadmap: 
+
+0. Load in the data and packages
+1. Get seed set per plant
+2. Standardize to the control group
+3. Combine with germination success
+4. Graph
+5. Run statistical analysis 
+
+# 0. Load in packages and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+#library(lme4)
+library(lmerTest)
+```
+
+
+```{r}
+garea <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv", header = TRUE)
+ggerm <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenGermCollated.csv", header = TRUE)
+gkey <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
+gpods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenExitData.csv", header = TRUE)
+gTBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenTBSeed.csv", header = TRUE)
+gDCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenDCSeed.csv", header = TRUE)
+#gflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenNumFlowers.csv", header = TRUE)
+```
+
+# 1. Get seed set per plant
+
+Remove unneeded rows from  pods
+
+```{r}
+gpods <- gpods %>%
+  select(pid, num.pods.m)
+```
+
+Exclude any pods that matured later/had no mature pods
+
+```{r}
+gpods <- gpods[gpods$num.pods.m != 0, ]
+```
+
+
+Seed mass per TB pod 
+
+```{r}
+gTBseed$mass.per.pod <- gTBseed$Mass..g. / gTBseed$Total.Pods
+```
+
+Remove unnecessary columns from TBseed
+
+```{r}
+gTBseed <- gTBseed %>%
+  select(pid = PID, mass.per.pod)
+```
+
+Seed num for DC
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(gDCseed$pid)
+
+#2. Make output dataset
+
+gDCseedout <- data.frame(pid = DCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- gDCseed[gDCseed$pid == DCpid[i], ]
+  gDCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
+## 2. Get standardized seed set metric
+
+1. Multiply avg seed set per plant by number of mature pods produced
+2. Get median of control group seed set by each plant type
+3. Divide each individual by that mean 
+4. Combine into one dataset 
+
+### Step 1
+
+
+```{r}
+gDCseedout <- merge(gDCseedout, gpods, by = "pid")
+gTBseed <- merge(gTBseed, gpods, by = "pid")
+
+gDCseedout$tot.seed.set <- gDCseedout$pod.avg * gDCseedout$num.pods.m
+gTBseed$tot.seed.set <- gTBseed$mass.per.pod * gTBseed$num.pods.m
+```
+
+
+### Step 2
+
+Select correct columns from key
+
+```{r}
+gkey <- gkey %>%
+  select(pid, type, treatment, column)
+```
+
+
+```{r}
+gDCseedout <- merge(gDCseedout, gkey, by = "pid")
+
+gDCseedout <- gDCseedout %>%
+  select(pid, type, treatment, column, tot.seed.set)
+
+gDCseedCON <- gDCseedout[gDCseedout$treatment == "CON", ]
+
+gmedianDC <- median(gDCseedCON$tot.seed.set)
+
+```
+
+
+```{r}
+gTBseed <- merge(gTBseed, gkey, by = "pid")
+
+gTBseed <- gTBseed %>%
+  select(pid, type, treatment, column, tot.seed.set)
+
+gTBseedCON <- gTBseed[gTBseed$treatment == "CON", ]
+
+gmedianTB <- median(gTBseedCON$tot.seed.set)
+
+```
+
+
+```{r}
+gDCseedout$stand.seed <- gDCseedout$tot.seed.set / gmedianDC
+
+gTBseed$stand.seed <- gTBseed$tot.seed.set / gmedianTB
+```
+
+## 3. Combine everything together
+
+```{r}
+ggerm <- ggerm %>%
+  select(pid, prop.sprouted)
+
+gcomb <- merge(garea, ggerm, by.x = "PID", by.y = "pid")
+#comb <- merge(comb, pods, by = "PID")
+
+gcomb <- merge(gcomb, gDCseedout, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"), all.x = TRUE)
+gcomb <- merge(gcomb, gTBseed, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"), all.x = TRUE)
+
+gcomb$column <- paste(gcomb$column.x, gcomb$column.y, sep = "")
+gcomb$column <- gsub("NA", "", gcomb$column)
+
+
+gcomb$stand.seed.set <- paste(gcomb$stand.seed.x, gcomb$stand.seed.y, sep = "")
+gcomb$stand.seed.set <- gsub("NA", "", gcomb$stand.seed.set)
+```
+
+
+### Calculate fitness: 
+
+```{r}
+gcomb$stand.seed.set <- as.numeric(gcomb$stand.seed.set)
+gcomb$ln.stand.seed.set <- log(gcomb$stand.seed.set)
+
+gcomb$rel.fitness <- gcomb$prop.sprouted * gcomb$ln.stand.seed.set
+```
+
+
+
+

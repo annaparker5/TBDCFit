@@ -38,7 +38,6 @@ library(Rmisc)
 library(ggplot2)
 ```
 
-## FIELD: 
 
 ```{r}
 garea <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv", header = TRUE)
