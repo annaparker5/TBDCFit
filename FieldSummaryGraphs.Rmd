@@ -97,13 +97,231 @@ fieldconsumpplotsubset <- ggplot(aes(x = treatment, y = tot.area, color = treatm
 fieldconsumpplotsubset
 ```
 
+### Save graphs
+
+```{r}
+
+```
+
+## B. Number of flowers
+
+### Create metric
+
+```{r}
+fflowerssubset <- merge(fflowers, fkeysubset, by = "pid")
+
+```
+
+### Graph
+
+```{r}
+fieldflowerplotsubset <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment, shape = type, fill = treatment), 
+                           data = fflowerssubset) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Treatment group", y = "Number of flowers produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+fieldflowerplotsubset
+```
 
 
-### Save graph
+### Save graphs
 
 ```{r}
 
 ```
 
 
+
+## C. Number of mature pods
+
+### Create metric
+
+```{r}
+fpods <- fpods %>%
+  select(PID, num.pod.m)
+
+fpodssubset <- merge(fpods, fkeysubset, by.x = "PID", by.y = "pid")
+```
+
+### Graph
+
+```{r}
+fieldpodsplotsubset <- ggplot(aes(x = treatment, y = num.pod.m, color = treatment, shape = type, fill = treatment), 
+                           data = fpodssubset) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Treatment group", y = "Number of mature pods produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+fieldpodsplotsubset
+```
+
+### Save graphs 
+
+```{r}
+
+```
+
+
+## D. Seeds germinated
+
+### Create metric
+
+Seed mass per TB pod 
+
+```{r}
+fTBseed$mass.per.pod <- fTBseed$Mass..g. / fTBseed$Total.Pods
+```
+
+Remove unnecessary columns fromm TBseed
+
+```{r}
+fTBseed <- fTBseed %>%
+  select(pid = PID, per.pod = mass.per.pod)
+```
+
+
+Make for loop to count total number of DC seeds
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+fDCpid <- unique(fDCseed$pid)
+
+#2. Make output dataset
+
+fDCseedout <- data.frame(pid = fDCpid, 
+                        pod.avg = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(fDCpid)){
+  subset <- fDCseed[fDCseed$pid == fDCpid[i], ]
+  fDCseedout[i, 2] <- mean(subset$num.m.seeds)
+}
+```
+
+
+```{r}
+fDCseedout <- fDCseedout %>%
+  select(pid, per.pod = pod.avg)
+```
+
+
+```{r}
+fperpod <- rbind(fTBseed, fDCseedout)
+```
+
+Add in treatment groups
+
+```{r}
+fseedoutsubset <- merge(fperpod, fkeysubset, all.y = TRUE, by = c("pid"))
+```
+
+Add in germination success
+
+```{r}
+fgerm <- fgerm %>%
+  select(pid, prop.sprouted)
+
+fgermsubset <- merge(fgerm, fkeysubset, by = "pid")
+```
+
+Merge to main datafile
+
+```{r}
+fseedoutsubset <- merge(fseedoutsubset, fgermsubset, all.x = TRUE, by = c("pid", "type", "treatment"))
+```
+
+
+Remove individuals that were moldy or had spodoptera damage and we couldn't mass the pods, or that were too moldy to germinate
+
+```{r}
+fseedoutsubset <- fseedoutsubset[is.na(fseedoutsubset$prop.sprouted) == FALSE, ]
+```
+
+Add in number of pods
+
+```{r}
+fseedoutsubset <- merge(fseedoutsubset, fpods, by.x = "pid", by.y = "PID")
+```
+
+
+
+Get success
+
+```{r}
+fseedoutsubset$success <- fseedoutsubset$per.pod * fseedoutsubset$num.pod.m * fseedoutsubset$prop.sprouted
+```
+
+
+### Graph
+
+```{r}
+fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type, fill = treatment), 
+                           data = fseedoutsubset) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Treatment group", y = "Amount of viable seed produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+fieldseedplotsubset
+```
+
+# 2. Fitness plot
+
+Get into one dataset
+
+```{r}
+ffitnesssubset <- merge(farea, fseedoutsubset, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
+```
+
+
+```{r}
+fieldfitnessplotsubset <- ggplot(aes(x = tot.area, y = success), 
+                           data = ffitnesssubset) + 
+  theme_bw() + 
+  geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
+       color = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free") 
+
+fieldfitnessplotsubset
+```
+
+
+Preliminary stats:
+
+```{r}
+fieldfitmod1 <- lm(success ~ tot.area*type, data = ffitnesssubset)
+
+anova(fieldfitmod1)
+```
+
+
+```{r}
+fieldfitmod2 <- lm(success ~ treatment*type, data = ffitnesssubset)
+
+anova(fieldfitmod2)
+```
 
