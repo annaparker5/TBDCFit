@@ -1,0 +1,109 @@
+---
+title: "Field Summary Graphs"
+output: html_notebook
+---
+
+This script makes the summary graphs suggested by Joel on 11/8/22 to Anna. 
+
+Roadmap:
+
+0. Load in data and packages
+1. For each metric (consumption, num flowers, num pods, num seeds germinated)
+  a. Create full datasets and subsets (excluding columns A-H) 
+  b. Create collated metric for each
+  c. Graph separately (DC vs TB) as violin plots with jittered points
+2. Plot fitness (num seeds germinated) vs. herbivory separately (DC vs TB)
+
+# 0. Load in packages and data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+farea <- read.csv("~/Desktop/GitHub/TBDCFit/Data/FieldLeafArea.csv", header = TRUE)
+fgerm <- read.csv("~/Desktop/GitHub/TBDCFit/Data/GermCollated.csv", header = TRUE)
+fkey <- read.csv("~/Desktop/GitHub/TBDCFit/Data/pidTrtKey.csv", header = TRUE)
+fpods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/ExitData.csv", header = TRUE)
+fTBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/TBSeedCorrect.csv", header = TRUE)
+fDCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
+fflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/FieldNumFlowers.csv", header = TRUE)
+```
+
+# 1. Create metrics and graph 
+
+## A. Consumption
+
+### Create subset dataset
+
+Make a subset of `r fkey` and then merge with desired dataset
+
+```{r}
+fkeysubset <- fkey[fkey$block != "I", ]
+
+fkeysubset <- fkeysubset %>%
+  select(pid, type, treatment)
+```
+
+### Create metric
+
+Fix wrong PID in farea
+
+```{r}
+farea[farea$PID == 110, 1] <- 300
+```
+
+
+Merge `r fkeysubset` with `r farea`
+
+```{r}
+fareasubset <- merge(farea, fkeysubset, by.x = c("PID", "type", "treatment"), by.y = c("pid", "type", "treatment"))
+```
+
+
+### Graph
+
+```{r}
+fieldconsumpplotfull <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type, fill = treatment), 
+                           data = farea) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type) 
+
+fieldconsumpplotfull
+```
+
+
+```{r}
+fieldconsumpplotsubset <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type, fill = treatment), 
+                           data = fareasubset) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type) 
+
+fieldconsumpplotsubset
+```
+
+
+
+### Save graph
+
+```{r}
+
+```
+
+
+
