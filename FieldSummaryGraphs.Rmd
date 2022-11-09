@@ -255,15 +255,28 @@ fseedoutsubset <- fseedoutsubset[is.na(fseedoutsubset$prop.sprouted) == FALSE, ]
 Add in number of pods
 
 ```{r}
-fseedoutsubset <- merge(fseedoutsubset, fpods, by.x = "pid", by.y = "PID")
+fseedoutsubset <- merge(fseedoutsubset, fpodssubset, all.y = TRUE, by.x = c("pid", "type", "treatment"), by.y = c("PID", "type", "treatment"))
 ```
 
+Keep plants with no mature pods, exclude plants with mature pods that we couldn't germinate. 
+
+```{r}
+fseedoutsubset <- fseedoutsubset[(!(fseedoutsubset$num.pod.m != 0 & is.na(fseedoutsubset$prop.sprouted) == TRUE)), ]
+```
 
 
 Get success
 
 ```{r}
 fseedoutsubset$success <- fseedoutsubset$per.pod * fseedoutsubset$num.pod.m * fseedoutsubset$prop.sprouted
+
+for(i in 1:length(fseedoutsubset$pid)){
+  if(is.na(fseedoutsubset[i, 7]) == TRUE){
+    fseedoutsubset[i, 7] <- 0
+  } else if(is.na(fseedoutsubset[i, 7]) == FALSE){
+    fseedoutsubset[i, 7] <- fseedoutsubset[i, 7]
+  }
+}
 ```
 
 
