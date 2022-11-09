@@ -1,0 +1,298 @@
+---
+title: "Greenhouse summary graphs"
+output: html_notebook
+---
+
+This script makes the summary graphs suggested by Joel on 11/8/22 to Anna. 
+
+Roadmap:
+
+0. Load in data and packages
+1. For each metric (consumption, num flowers, num pods, num seeds germinated)
+  a. Create collated metric 
+  b. Graph separately (DC vs TB) as violin plots with jittered points
+2. Plot fitness (num seeds germinated) vs. herbivory separately (DC vs TB)
+
+
+# 0. Load in the data 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+```{r}
+garea <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenLeafArea.csv", header = TRUE)
+ggerm <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenGermCollated.csv", header = TRUE)
+gkey <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenPIDTrtKey.csv", header = TRUE)
+gpods <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenExitData.csv", header = TRUE)
+gTBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenTBSeed.csv", header = TRUE)
+gDCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenDCSeed.csv", header = TRUE)
+gflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenNumFlowers.csv", header = TRUE)
+```
+
+# 1. Create metrics and graph 
+
+## A. Consumption
+
+### Create metric
+
+Already completed - have treatment and type in `r garea`. 
+
+### Graph
+
+```{r}
+greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type, fill = treatment), 
+                           data = garea) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_jitter(alpha = 0.8, width = 0.2) + 
+  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type) 
+
+greenconsumpplot
+```
+
+### Save graph
+
+```{r}
+
+```
+
+
+## B. Number of flowers
+
+### Create metric
+
+```{r}
+gkey <- gkey %>%
+  select(pid, type, treatment)
+
+gflowers <- merge(gflowers, gkey, by = "pid")
+
+```
+
+### Graph
+
+```{r}
+greenflowerplot <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment, shape = type, fill = treatment), 
+                           data = gflowers) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_jitter(alpha = 0.8, width = 0.2) + 
+  labs(x = "Treatment group", y = "Number of flowers produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+greenflowerplot
+```
+
+
+### Save graph
+
+```{r}
+
+```
+
+
+## C. Number of mature pods
+
+### Create metric
+
+```{r}
+gpods <- gpods %>%
+  select(pid, num.pods.m)
+
+gpods <- merge(gpods, gkey, by = "pid")
+```
+
+### Graph
+
+```{r}
+greenpodsplot <- ggplot(aes(x = treatment, y = num.pods.m, color = treatment, shape = type, fill = treatment), 
+                           data = gpods) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_jitter(alpha = 0.8, width = 0.2) + 
+  labs(x = "Treatment group", y = "Number of mature pods produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+greenpodsplot
+```
+
+### Save graph
+
+```{r}
+
+```
+
+
+## D. Seeds germinated
+
+### Create metric
+
+Make for loop to count total number of DC seeds
+
+```{r}
+#1. List of unique PIDs in DCseed
+
+DCpid <- unique(gDCseed$pid)
+
+#2. Make output dataset
+
+gDCseedout <- data.frame(pid = DCpid, 
+                        seed.tot = 0)
+
+#3. write the for loop 
+
+for(i in 1:length(DCpid)){
+  subset <- gDCseed[gDCseed$pid == DCpid[i], ]
+  gDCseedout[i, 2] <- sum(subset$num.m.seeds)
+}
+
+
+```
+
+Add in treatment groups
+
+```{r}
+gseedout <- merge(gDCseedout, gkey, all.y = TRUE, by = c("pid", "treatment", "type"))
+```
+
+Add in TB
+
+```{r}
+gTBseed <- merge(gTBseed, gpods, by.x = "PID", by.y = "pid")
+
+gTBseed$seed.tot <- (gTBseed$Mass..g. / gTBseed$Total.Pods) * gTBseed$num.pods.m
+```
+
+Add in zeros
+
+```{r}
+gTBseed[gTBseed$PID == 241, 8] <- 0
+gTBseed[gTBseed$PID == 271, 8] <- 0
+
+gTBseed <- gTBseed %>%
+  select(PID, seed.tot)
+```
+
+Merge with gseedout
+
+```{r}
+gseedout <- merge(gseedout, gTBseed, all.x = TRUE, by.x = c("pid"), by.y = c("PID"))
+```
+
+
+Add in zeros
+
+```{r}
+for(i in 1:length(gseedout$pid)){
+  if(is.na(gseedout[i, 4]) == TRUE){
+    gseedout[i, 4] <- 0
+  } else if(is.na(gseedout[i, 4]) == FALSE){
+    gseedout[i, 4] <- gseedout[i, 4]
+  }
+}
+
+
+for(i in 1:length(gseedout$pid)){
+  if(is.na(gseedout[i, 5]) == TRUE){
+    gseedout[i, 5] <- 0
+  } else if(is.na(gseedout[i, 5]) == FALSE){
+    gseedout[i, 5] <- gseedout[i, 5]
+  }
+}
+
+gseedout$seed.tot <- gseedout$seed.tot.x + gseedout$seed.tot.y
+
+gseedout <- gseedout %>%
+  select(pid, treatment, type, seed.tot)
+```
+
+Add in germination success
+
+```{r}
+ggerm <- ggerm %>%
+  select(pid, prop.sprouted)
+
+
+gseedout <- merge(gseedout, ggerm, all.x = TRUE, by = "pid")
+
+for(i in 1:length(gseedout$pid)){
+  if(is.na(gseedout[i, 5]) == TRUE){
+    gseedout[i, 5] <- 0
+  } else if(is.na(gseedout[i, 5]) == FALSE){
+    gseedout[i, 5] <- gseedout[i, 5]
+  }
+}
+
+
+
+gseedout$success <- gseedout$seed.tot * gseedout$prop.sprouted
+```
+
+
+
+### Graph
+
+```{r}
+greenseedplot <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type, fill = treatment), 
+                           data = gseedout) + 
+  theme_bw() + 
+  geom_violin(alpha = 0.5, scale = "width") + 
+  geom_jitter(alpha = 0.8, width = 0.2) + 
+  labs(x = "Treatment group", y = "Amount of viable seed produced", 
+       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") 
+
+greenseedplot
+```
+
+### Save graph
+
+```{r}
+
+```
+
+
+# 2. Fitness plot
+
+Get into one dataset
+
+```{r}
+gfitness <- merge(garea, gseedout, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
+```
+
+
+```{r}
+greenfitnessplot <- ggplot(aes(x = tot.area, y = success), 
+                           data = gfitness) + 
+  theme_bw() + 
+  geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
+       color = "Treatment", shape = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free") 
+
+greenfitnessplot
+```
+
+
