@@ -65,34 +65,34 @@ fareasubset <- merge(farea, fkeysubset, by.x = c("PID", "type", "treatment"), by
 ### Graph
 
 ```{r}
-fieldconsumpplotfull <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type, fill = treatment), 
+fieldconsumpplotfull <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type), 
                            data = farea) + 
   theme_bw() + 
-  geom_violin(alpha = 0.5, scale = "width") + 
-  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
   labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
        color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type) 
+  facet_wrap(~ type) +
+  theme(legend.position = "none")
 
 fieldconsumpplotfull
 ```
 
 
 ```{r}
-fieldconsumpplotsubset <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type, fill = treatment), 
+fieldconsumpplotsubset <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type), 
                            data = fareasubset) + 
   theme_bw() + 
-  geom_violin(alpha = 0.5, scale = "width") + 
-  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
   labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
        color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type) 
+  facet_wrap(~ type) +
+  theme(legend.position = "none")
 
 fieldconsumpplotsubset
 ```
@@ -115,17 +115,17 @@ fflowerssubset <- merge(fflowers, fkeysubset, by = "pid")
 ### Graph
 
 ```{r}
-fieldflowerplotsubset <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment, shape = type, fill = treatment), 
+fieldflowerplotsubset <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment, shape = type), 
                            data = fflowerssubset) + 
   theme_bw() + 
-  geom_violin(alpha = 0.5, scale = "width") + 
-  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
   labs(x = "Treatment group", y = "Number of flowers produced", 
        color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free_y") 
+  facet_wrap(~ type, scales = "free_y") +
+  theme(legend.position = "none")
 
 fieldflowerplotsubset
 ```
@@ -153,17 +153,17 @@ fpodssubset <- merge(fpods, fkeysubset, by.x = "PID", by.y = "pid")
 ### Graph
 
 ```{r}
-fieldpodsplotsubset <- ggplot(aes(x = treatment, y = num.pod.m, color = treatment, shape = type, fill = treatment), 
+fieldpodsplotsubset <- ggplot(aes(x = treatment, y = num.pod.m, color = treatment, shape = type), 
                            data = fpodssubset) + 
   theme_bw() + 
-  geom_violin(alpha = 0.5, scale = "width") + 
-  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
   labs(x = "Treatment group", y = "Number of mature pods produced", 
        color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free_y") 
+  facet_wrap(~ type, scales = "free_y") +
+  theme(legend.position = "none")
 
 fieldpodsplotsubset
 ```
@@ -283,17 +283,17 @@ for(i in 1:length(fseedoutsubset$pid)){
 ### Graph
 
 ```{r}
-fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type, fill = treatment), 
+fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type), 
                            data = fseedoutsubset) + 
   theme_bw() + 
-  geom_violin(alpha = 0.5, scale = "width") + 
-  geom_point(alpha = 0.8, position = position_jitter(width = .2, height = 0)) + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
   labs(x = "Treatment group", y = "Amount of viable seed produced", 
        color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_fill_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free_y") 
+  facet_wrap(~ type, scales = "free_y") +
+  theme(legend.position = "none")
 
 fieldseedplotsubset
 ```
