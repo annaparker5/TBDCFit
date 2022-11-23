@@ -48,8 +48,8 @@ greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, s
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  labs(x = "Expected outcome", y = expression(paste("Total leaf area consumed ", (cm^{2})))
+       ) + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type) + 
@@ -85,8 +85,8 @@ greenflowerplot <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment,
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Number of flowers produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  labs(x = "Expected outcome", y = "Number of flowers produced" 
+       ) + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
@@ -123,8 +123,8 @@ greenpodsplot <- ggplot(aes(x = treatment, y = num.pods.m, color = treatment, sh
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Number of mature pods produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
+  labs(x = "Expected outcome", y = "Number of mature pods produced"
+       ) + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
@@ -169,7 +169,7 @@ for(i in 1:length(DCpid)){
 Add in treatment groups
 
 ```{r}
-gseedout <- merge(gDCseedout, gkey, all.y = TRUE, by = c("pid", "treatment", "type"))
+gseedout <- merge(gDCseedout, gkey, all.y = TRUE, by = c("pid"))
 ```
 
 Add in TB
@@ -201,10 +201,10 @@ Add in zeros
 
 ```{r}
 for(i in 1:length(gseedout$pid)){
-  if(is.na(gseedout[i, 4]) == TRUE){
-    gseedout[i, 4] <- 0
-  } else if(is.na(gseedout[i, 4]) == FALSE){
-    gseedout[i, 4] <- gseedout[i, 4]
+  if(is.na(gseedout[i, 2]) == TRUE){
+    gseedout[i, 2] <- 0
+  } else if(is.na(gseedout[i, 2]) == FALSE){
+    gseedout[i, 2] <- gseedout[i, 2]
   }
 }
 
@@ -255,11 +255,14 @@ greenseedplot <- ggplot(aes(x = treatment, y = success, color = treatment, shape
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Amount of viable seed produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free_y") 
+  labs(x = "Expected outcome", y = "Amount of viable seed produced" 
+       ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") +
+  theme(legend.position = "none")
+
+
 
 greenseedplot
 ```
