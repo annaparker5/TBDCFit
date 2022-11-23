@@ -70,10 +70,10 @@ fieldconsumpplotfull <- ggplot(aes(x = treatment, y = tot.area, color = treatmen
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = "Expected outcome", y = expression(paste("Total leaf area consumed ", (cm^{2})))
+       ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type) +
   theme(legend.position = "none")
 
@@ -87,10 +87,10 @@ fieldconsumpplotsubset <- ggplot(aes(x = treatment, y = tot.area, color = treatm
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = expression(paste("Total leaf area consumed ", (cm^{2}))), 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = "Expected outcome", y = expression(paste("Total leaf area consumed ", (cm^{2})))
+      ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type) +
   theme(legend.position = "none")
 
@@ -120,10 +120,10 @@ fieldflowerplotsubset <- ggplot(aes(x = treatment, y = tot.flowers, color = trea
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Number of flowers produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = "Expected outcome", y = "Number of flowers produced" 
+       ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
   theme(legend.position = "none")
 
@@ -158,10 +158,10 @@ fieldpodsplotsubset <- ggplot(aes(x = treatment, y = num.pod.m, color = treatmen
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Number of mature pods produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = "Expected outcome", y = "Number of mature pods produced"
+       ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
   theme(legend.position = "none")
 
@@ -288,10 +288,9 @@ fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment,
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Treatment group", y = "Amount of viable seed produced", 
-       color = "Treatment", fill = "Treatment", shape = "Hostplant") + 
-  #scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
+  labs(x = "Expected outcome", y = "Amount of viable seed produced") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
   theme(legend.position = "none")
 
