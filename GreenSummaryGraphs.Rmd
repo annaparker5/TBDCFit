@@ -60,7 +60,7 @@ greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, s
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type) + 
-  geom_text(data = greenann3, aes(x = "CON", y = 8000, label = label), size = 10) + 
+  geom_text(data = greenann3, aes(x = "CON", y = 8500, label = label), size = 10) + 
   theme(legend.position = "none")
 
 greenconsumpplot
