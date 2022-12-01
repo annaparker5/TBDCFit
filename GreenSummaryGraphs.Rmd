@@ -61,7 +61,7 @@ greenconsumpplot
 ### Save graph
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig3green.png", greenconsumpplot, width = 8, height = 5)
 ```
 
 
@@ -100,7 +100,7 @@ greenflowerplot
 ### Save graph
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1ABgreen.png", greenflowerplot, width = 8, height = 5)
 ```
 
 
@@ -136,7 +136,7 @@ greenpodsplot
 ### Save graph
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1CDgreen.png", greenpodsplot, width = 8, height = 5)
 ```
 
 
@@ -270,7 +270,7 @@ greenseedplot
 ### Save graph
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1EFgreen.png", greenseedplot, width = 8, height = 5)
 ```
 
 
@@ -290,12 +290,17 @@ greenfitnessplot <- ggplot(aes(x = tot.area, y = success),
   geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
-       color = "Treatment", shape = "Hostplant") + 
+       color = "Expected outcome", shape = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free") 
 
 greenfitnessplot
+```
+
+save plot: 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4green.png", greenfitnessplot, width = 8, height = 5)
 ```
 
 

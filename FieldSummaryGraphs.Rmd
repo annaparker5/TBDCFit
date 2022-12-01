@@ -100,7 +100,7 @@ fieldconsumpplotsubset
 ### Save graphs
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig3field.png", fieldconsumpplotsubset, width = 8, height = 5)
 ```
 
 ## B. Number of flowers
@@ -134,7 +134,7 @@ fieldflowerplotsubset
 ### Save graphs
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2ABfield.png", fieldflowerplotsubset, width = 8, height = 5)
 ```
 
 
@@ -171,7 +171,7 @@ fieldpodsplotsubset
 ### Save graphs 
 
 ```{r}
-
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2CDfield.png", fieldpodsplotsubset, width = 8, height = 5)
 ```
 
 
@@ -296,6 +296,13 @@ fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment,
 
 fieldseedplotsubset
 ```
+### Save graph
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2EFfield.png", fieldseedplotsubset, width = 8, height = 5)
+```
+
+
 
 # 2. Fitness plot
 
@@ -313,13 +320,19 @@ fieldfitnessplotsubset <- ggplot(aes(x = tot.area, y = success),
   geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
-       color = "Treatment", shape = "Hostplant") + 
+       color = "Expected outcome", shape = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free") 
 
 fieldfitnessplotsubset
 ```
+
+save graph: 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4field.png", fieldfitnessplotsubset, width = 8, height = 5)
+```
+
 
 
 Preliminary stats:
