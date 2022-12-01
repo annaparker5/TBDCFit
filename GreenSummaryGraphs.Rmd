@@ -43,6 +43,13 @@ Already completed - have treatment and type in `r garea`.
 ### Graph
 
 ```{r}
+greenann3 <- data.frame(label = c("A", "B"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA)
+```
+
+
+```{r}
 greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, shape = type), 
                            data = garea) + 
   theme_bw() + 
@@ -53,6 +60,7 @@ greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, s
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type) + 
+  geom_text(data = greenann3, aes(x = "CON", y = 8000, label = label), size = 10) + 
   theme(legend.position = "none")
 
 greenconsumpplot
@@ -80,6 +88,14 @@ gflowers <- merge(gflowers, gkey, by = "pid")
 ### Graph
 
 ```{r}
+greenannS1AB <- data.frame(label = c("A", "B"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(60, 209))
+```
+
+
+```{r}
 greenflowerplot <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment, shape = type), 
                            data = gflowers) + 
   theme_bw() + 
@@ -90,6 +106,7 @@ greenflowerplot <- ggplot(aes(x = treatment, y = tot.flowers, color = treatment,
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
+  geom_text(data = greenannS1AB, aes(x = "WOWE", y = height, label = label), size = 10) + 
   theme(legend.position = "none")
   
 
@@ -118,6 +135,14 @@ gpods <- merge(gpods, gkey, by = "pid")
 ### Graph
 
 ```{r}
+greenannS1CD <- data.frame(label = c("C", "D"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(7.6, 130))
+```
+
+
+```{r}
 greenpodsplot <- ggplot(aes(x = treatment, y = num.pods.m, color = treatment, shape = type), 
                            data = gpods) + 
   theme_bw() + 
@@ -128,6 +153,7 @@ greenpodsplot <- ggplot(aes(x = treatment, y = num.pods.m, color = treatment, sh
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
+  geom_text(data = greenannS1CD, aes(x = "WOWE", y = height, label = label), size = 10) + 
   theme(legend.position = "none")
 
 greenpodsplot
@@ -250,6 +276,14 @@ gseedout$success <- gseedout$seed.tot * gseedout$prop.sprouted
 ### Graph
 
 ```{r}
+greenannS1EF <- data.frame(label = c("E", "F"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(222, 28))
+```
+
+
+```{r}
 greenseedplot <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type), 
                            data = gseedout) + 
   theme_bw() + 
@@ -260,6 +294,7 @@ greenseedplot <- ggplot(aes(x = treatment, y = success, color = treatment, shape
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
+  geom_text(data = greenannS1EF, aes(x = "WOWE", y = height, label = label), size = 10) + 
   theme(legend.position = "none")
 
 
@@ -284,6 +319,16 @@ gfitness <- merge(garea, gseedout, by.x = c("PID", "treatment", "type"), by.y = 
 
 
 ```{r}
+greenann4 <- data.frame(label = c("A", "B"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(217.5, 28), 
+                   width = c(3750, 8000))
+```
+
+
+
+```{r}
 greenfitnessplot <- ggplot(aes(x = tot.area, y = success), 
                            data = gfitness) + 
   theme_bw() + 
@@ -293,7 +338,8 @@ greenfitnessplot <- ggplot(aes(x = tot.area, y = success),
        color = "Expected outcome", shape = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free") 
+  facet_wrap(~ type, scales = "free") + 
+  geom_text(data = greenann4, aes(x = width, y = height, label = label), size = 10, color = "gray50") 
 
 greenfitnessplot
 ```
