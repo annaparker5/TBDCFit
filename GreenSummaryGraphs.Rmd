@@ -19,6 +19,7 @@ Roadmap:
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(lmerTest)
 ```
 
 
@@ -31,6 +32,14 @@ gTBseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenTBSeed.csv", 
 gDCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenDCSeed.csv", header = TRUE)
 gflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenNumFlowers.csv", header = TRUE)
 ```
+
+```{r}
+gcolumn <- gkey %>%
+  select(pid, column)
+```
+
+
+
 
 # 1. Create metrics and graph 
 
@@ -70,6 +79,30 @@ greenconsumpplot
 
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig3green.png", greenconsumpplot, width = 8, height = 5)
+```
+
+### Run stats
+
+```{r}
+garea <- merge(garea, gcolumn, by.x = "PID", by.y = "pid")
+```
+
+
+With column:
+```{r}
+gmodconsumpcol <- lmer(tot.area ~ treatment*type + (1|column), data = garea)
+
+summary(gmodconsumpcol)
+```
+
+Column's variance is Zero - not necessary to include because it has no bearing on the consumption. 
+
+Without column: 
+
+```{r}
+gmodconsump <- lm(tot.area ~ treatment*type, data = garea)
+
+anova(gmodconsump)
 ```
 
 
@@ -120,6 +153,15 @@ greenflowerplot
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1ABgreen.png", greenflowerplot, width = 8, height = 5)
 ```
 
+### Run model
+
+```{r}
+gmodflow <- lm(tot.flowers ~ treatment*type, data = gflowers)
+
+anova(gmodflow)
+```
+
+
 
 ## C. Number of mature pods
 
@@ -164,6 +206,15 @@ greenpodsplot
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1CDgreen.png", greenpodsplot, width = 8, height = 5)
 ```
+
+### Run model
+
+```{r}
+gmodpods <- lm(num.pods.m ~ treatment*type, data = gpods)
+
+anova(gmodpods)
+```
+
 
 
 ## D. Seeds germinated
@@ -309,6 +360,16 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1EFgreen.png", greenseedplot, width
 ```
 
 
+### Run model
+
+```{r}
+gmodseed <- lm(success ~ treatment*type, data = gseedout)
+
+anova(gmodseed)
+```
+
+
+
 # 2. Fitness plot
 
 Get into one dataset
@@ -364,4 +425,28 @@ greenfitmod2 <- lm(success ~ treatment*type, data = gfitness)
 
 anova(greenfitmod2)
 ```
+
+```{r}
+AIC(greenfitmod1, greenfitmod2)
+```
+Indistinguishable! Fun! 
+
+
+With column: 
+
+```{r}
+greenfitmod3 <- lmer(success ~ tot.area*type + (1|column), data = gfitness)
+
+summary(greenfitmod3)
+```
+
+```{r}
+greenfitmod4 <- lmer(success ~ treatment*type + (1|column), data = gfitness)
+
+summary(greenfitmod4)
+```
+
+
+
+
 
