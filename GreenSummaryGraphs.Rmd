@@ -36,6 +36,8 @@ gflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/Greenhouse/GreenNumFlowers.c
 ```{r}
 gcolumn <- gkey %>%
   select(pid, column)
+
+gcolumn$column <- as.factor(gcolumn$column)
 ```
 
 
@@ -101,6 +103,8 @@ Without column:
 
 ```{r}
 gmodconsump <- lm(tot.area ~ treatment*type, data = garea)
+
+summary(gmodconsump)
 
 anova(gmodconsump)
 ```
@@ -217,7 +221,7 @@ anova(gmodpods)
 
 
 
-## D. Seeds germinated
+## D. Seed set
 
 ### Create metric
 
@@ -330,17 +334,17 @@ gseedout$success <- gseedout$seed.tot * gseedout$prop.sprouted
 greenannS1EF <- data.frame(label = c("E", "F"), 
                    type = c("DC", "TB"), 
                    treatment = NA, 
-                   height = c(222, 28))
+                   height = c(350, 35))
 ```
 
 
 ```{r}
-greenseedplot <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type), 
+greenseedplot <- ggplot(aes(x = treatment, y = seed.tot, color = treatment, shape = type), 
                            data = gseedout) + 
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Expected outcome", y = "Amount of viable seed produced" 
+  labs(x = "Expected outcome", y = "Seed set" 
        ) + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
@@ -363,11 +367,57 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1EFgreen.png", greenseedplot, width
 ### Run model
 
 ```{r}
-gmodseed <- lm(success ~ treatment*type, data = gseedout)
+gmodseed <- lm(seed.tot ~ treatment*type, data = gseedout)
 
 anova(gmodseed)
 ```
 
+
+## E. Germination success
+
+```{r}
+greenannS1GH <- data.frame(label = c("G", "H"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(1.2, 1.2))
+```
+
+```{r}
+greengermplot <- ggplot(aes(x = treatment, y = prop.sprouted, color = treatment, shape = type), 
+                           data = gseedout) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Expected outcome", y = "Germination Success" ) + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type) +
+  ylim(0, 1.21) + 
+  geom_text(data = greenannS1GH, aes(x = "WOWE", y = height, label = label), size = 10) + 
+  theme(legend.position = "none")
+
+
+
+greengermplot
+```
+
+
+### Save graph
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1GHgreen.png", greengermplot, width = 8, height = 5)
+```
+
+
+### Run model
+
+```{r}
+gmodgerm <- glm(prop.sprouted ~ treatment*type, data = gseedout, family = "binomial")
+
+summary(gmodgerm)
+
+anova(gmodgerm, test = "Chisq")
+```
 
 
 # 2. Fitness plot
