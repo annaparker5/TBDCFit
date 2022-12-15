@@ -19,6 +19,8 @@ Roadmap:
 ```{r}
 library(tidyverse)
 library(ggplot2)
+#library(nlme)
+library(lmerTest)
 ```
 
 ```{r}
@@ -31,6 +33,13 @@ fDCseed <- read.csv("~/Desktop/GitHub/TBDCFit/Data/DCSeed.csv", header = TRUE)
 fflowers <- read.csv("~/Desktop/GitHub/TBDCFit/Data/FieldNumFlowers.csv", header = TRUE)
 ```
 
+
+```{r}
+fcolumn <- fkey %>%
+  select(pid, column)
+```
+
+
 # 1. Create metrics and graph 
 
 ## A. Consumption
@@ -42,9 +51,13 @@ Make a subset of `r fkey` and then merge with desired dataset
 ```{r}
 fkeysubset <- fkey[fkey$block != "I", ]
 
+fcolumnsubset <- fkeysubset %>%
+  select(pid, column)
+
 fkeysubset <- fkeysubset %>%
   select(pid, type, treatment)
 ```
+
 
 ### Create metric
 
@@ -112,12 +125,33 @@ fieldconsumpplotsubset
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig3field.png", fieldconsumpplotsubset, width = 8, height = 5)
 ```
 
+### Run stats
+
+```{r}
+farea <- merge(farea, fcolumn, by.x = "PID", by.y = "pid")
+```
+
+```{r}
+fareasubset <- merge(fareasubset, fcolumnsubset, by.x = "PID", by.y = "pid")
+```
+
+
+```{r}
+fmodconsumpsubsetcol <- lmer(tot.area ~ treatment*type + (1|column), data = fareasubset, REML = FALSE)
+
+anova(fmodconsumpsubsetcol)
+```
+
+
+
 ## B. Number of flowers
 
 ### Create metric
 
 ```{r}
 fflowerssubset <- merge(fflowers, fkeysubset, by = "pid")
+
+fflowerssubset <- merge(fflowerssubset, fcolumnsubset, by = "pid")
 
 ```
 
@@ -156,6 +190,14 @@ fieldflowerplotsubset
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2ABfield.png", fieldflowerplotsubset, width = 8, height = 5)
 ```
 
+### Run stats
+
+```{r}
+fmodflowerssubsetcol <- lmer(tot.flowers ~ treatment*type + (1|column), data = fflowerssubset, REML = FALSE)
+
+anova(fmodflowerssubsetcol)
+```
+**IS SINGULAR**
 
 
 ## C. Number of mature pods
@@ -167,6 +209,7 @@ fpods <- fpods %>%
   select(PID, num.pod.m)
 
 fpodssubset <- merge(fpods, fkeysubset, by.x = "PID", by.y = "pid")
+fpodssubset <- merge(fpodssubset, fcolumnsubset, by.x = "PID", by.y = "pid")
 ```
 
 ### Graph
@@ -202,8 +245,17 @@ fieldpodsplotsubset
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2CDfield.png", fieldpodsplotsubset, width = 8, height = 5)
 ```
 
+### Run stats
 
-## D. Seeds germinated
+```{r}
+fmodpodssubsetcol <- lmer(num.pod.m ~ treatment*type + (1|column), data = fpodssubset, REML = FALSE)
+
+anova(fmodpodssubsetcol)
+```
+
+
+
+## D. Seed set
 
 ### Create metric
 
@@ -296,13 +348,17 @@ fseedoutsubset <- fseedoutsubset[(!(fseedoutsubset$num.pod.m != 0 & is.na(fseedo
 Get success
 
 ```{r}
-fseedoutsubset$success <- fseedoutsubset$per.pod * fseedoutsubset$num.pod.m * fseedoutsubset$prop.sprouted
+fseedoutsubset$seed.tot <- fseedoutsubset$per.pod * fseedoutsubset$num.pod.m 
+
+fseedoutsubset$success <- fseedoutsubset$seed.tot * fseedoutsubset$prop.sprouted
 
 for(i in 1:length(fseedoutsubset$pid)){
-  if(is.na(fseedoutsubset[i, 7]) == TRUE){
-    fseedoutsubset[i, 7] <- 0
-  } else if(is.na(fseedoutsubset[i, 7]) == FALSE){
-    fseedoutsubset[i, 7] <- fseedoutsubset[i, 7]
+  if(is.na(fseedoutsubset[i, 9]) == TRUE){
+    fseedoutsubset[i, 8] <- 0
+    fseedoutsubset[i, 9] <- 0
+  } else if(is.na(fseedoutsubset[i, 9]) == FALSE){
+    fseedoutsubset[i, 8] <- fseedoutsubset[i, 8]
+    fseedoutsubset[i, 9] <- fseedoutsubset[i, 9]
   }
 }
 ```
@@ -315,16 +371,17 @@ for(i in 1:length(fseedoutsubset$pid)){
 fieldannS1EF <- data.frame(label = c("E", "F"), 
                    type = c("DC", "TB"), 
                    treatment = NA, 
-                   height = c(1650, 33))
+                   height = c(2300, 57))
 ```
 
+
 ```{r}
-fieldseedplotsubset <- ggplot(aes(x = treatment, y = success, color = treatment, shape = type), 
+fieldseedplotsubset <- ggplot(aes(x = treatment, y = seed.tot, color = treatment, shape = type), 
                            data = fseedoutsubset) + 
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Expected outcome", y = "Amount of viable seed produced") + 
+  labs(x = "Expected outcome", y = "Seed set") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
   facet_wrap(~ type, scales = "free_y") +
@@ -340,13 +397,70 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2EFfield.png", fieldseedplotsubset,
 ```
 
 
+### Run stats
+
+```{r}
+fmodseedsubsetcol <- lmer(seed.tot ~ treatment*type + (1|column), data = fseedoutsubset, REML = FALSE)
+
+anova(fmodseedsubsetcol)
+```
+
+## E. Germination success
+
+
+```{r}
+fieldannS1GH <- data.frame(label = c("G", "H"), 
+                   type = c("DC", "TB"), 
+                   treatment = NA, 
+                   height = c(1.2, 1.2))
+```
+
+
+```{r}
+fieldgermplotsubset <- ggplot(aes(x = treatment, y = prop.sprouted, color = treatment, shape = type), 
+                           data = fseedoutsubset) + 
+  theme_bw() + 
+  geom_boxplot() + 
+  #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
+  labs(x = "Expected outcome", y = "Germination success") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  #scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free_y") +
+  geom_text(data = fieldannS1GH, aes(x = "WOWE", y = height, label = label), size = 10) + 
+  theme(legend.position = "none")
+
+fieldgermplotsubset
+```
+
+### Save graph
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2GHfield.png", fieldgermplotsubset, width = 8, height = 5)
+```
+
+
+### Run stats
+
+```{r}
+fmodgermsubsetcol <- glmer(prop.sprouted ~ treatment*type + (1|column), family = "binomial", data = fseedoutsubset)
+
+summary(fmodgermsubsetcol)
+
+anova(fmodgermsubsetcol)
+
+library(car)
+
+Anova(fmodgermsubsetcol, type = 3)
+```
+
+**Model failed to converge**
 
 # 2. Fitness plot
 
 Get into one dataset
 
 ```{r}
-ffitnesssubset <- merge(farea, fseedoutsubset, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
+ffitnesssubset <- merge(farea, fseedoutsubset, by.x = c("PID", "treatment", "type", "column"), by.y = c("pid", "treatment", "type", "column"))
 ```
 
 
@@ -382,20 +496,18 @@ save graph:
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4field.png", fieldfitnessplotsubset, width = 8, height = 5)
 ```
 
-
-
-Preliminary stats:
+### Stats
 
 ```{r}
-fieldfitmod1 <- lm(success ~ tot.area*type, data = ffitnesssubset)
+fmodfitnesssubset <- lmer(success ~ treatment*type + (1|column), data = ffitnesssubset, REML = FALSE)
 
-anova(fieldfitmod1)
+anova(fmodfitnesssubset)
 ```
 
 
+
 ```{r}
-fieldfitmod2 <- lm(success ~ treatment*type, data = ffitnesssubset)
+fmodfitnesssubset2 <- lmer(success ~ tot.area*type + (1|column), data = ffitnesssubset, REML = FALSE)
 
-anova(fieldfitmod2)
+anova(fmodfitnesssubset2)
 ```
-
