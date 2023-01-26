@@ -428,29 +428,44 @@ Get into one dataset
 gfitness <- merge(garea, gseedout, by.x = c("PID", "treatment", "type"), by.y = c("pid", "treatment", "type"))
 ```
 
+**NEW 1/26/23: Scale fitness to be relative fitness, with CON median = 1**
+
+```{r}
+gfitness$rel.fitness <- 0
+
+gfitness[gfitness$type == "DC", 9] <- (gfitness[gfitness$type == "DC", 8]) / (median(gfitness[gfitness$treatment == "CON" & gfitness$type == "DC", 8]))
+
+gfitness[gfitness$type == "TB", 9] <- (gfitness[gfitness$type == "TB", 8]) / (median(gfitness[gfitness$treatment == "CON" & gfitness$type == "TB", 8]))
+```
+
+
+
 
 ```{r}
 greenann4 <- data.frame(label = c("A", "B"), 
                    type = c("DC", "TB"), 
                    treatment = NA, 
-                   height = c(217.5, 28), 
+                   height = c(5, 5), 
                    width = c(3750, 8000))
 ```
 
 
 
 ```{r}
-greenfitnessplot <- ggplot(aes(x = tot.area, y = success), 
+greenfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), 
                            data = gfitness) + 
-  theme_bw() + 
-  geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
+  theme_bw() +
+  xlim(0, 8000) + 
+  #ylim(0, 4.5) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
-  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
-       color = "Expected outcome", shape = "Hostplant") + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free") + 
-  geom_text(data = greenann4, aes(x = width, y = height, label = label), size = 10, color = "gray50") 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  oob_squish()
+  scale_y_continuous(limits=c(0,4.5), oob = oob_squish())
 
 greenfitnessplot
 ```
@@ -459,6 +474,54 @@ save plot:
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4green.png", greenfitnessplot, width = 8, height = 5)
 ```
+
+**For GRC poster and presentation:**
+
+```{r}
+
+```
+
+
+```{r}
+GRCfitnessplot <- ggplot(aes(x = tot.area, y = success), 
+                           data = gfitness) + 
+  theme_bw() + 
+  geom_smooth(aes(ymin = 0), method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
+       color = "Expected outcome", shape = "Hostplant") + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type, scales = "free") + 
+ # ylim(0, 200)  + 
+  geom_text(data = greenann4, aes(x = width, y = height, label = label), size = 10, color = "gray50") 
+
+GRCfitnessplot
+```
+
+```{r}
+GRCfitnessplotDC <- ggplot(aes(x = tot.area, y = success), 
+                           data = gfitness[gfitness$type == "DC", ]) + 
+  theme_bw() + 
+  geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
+       color = "Expected outcome", shape = "Hostplant") + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  facet_wrap(~ type) + 
+  scale_y_continuous(limits = c(0, 235))  + 
+  geom_text(data = greenann4[greenann4$type == "DC", ], 
+            aes(x = width, y = height, label = label), size = 10, color = "gray50") + 
+  theme(legend.position = "none")
+
+GRCfitnessplotDC
+```
+
+```{r}
+#ggsaave("~/Desktop/GitHub/TBDCFit/Figures/")
+```
+
 
 
 Preliminary stats:
