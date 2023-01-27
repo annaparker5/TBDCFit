@@ -475,6 +475,29 @@ save plot:
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew.png", greenfitnessplot, width = 8, height = 5)
 ```
 
+```{r}
+greenfitnessplotpoly <- ggplot(aes(x = tot.area, y = rel.fitness), 
+                           data = gfitness) + 
+  theme_bw() +
+  xlim(0, 8000) + 
+  ylim(0, 3) + 
+  stat_smooth(aes(linetype = type), method = lm, formula = y ~ poly(x, 2, raw = TRUE), alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
+  #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
+
+greenfitnessplotpoly
+```
+
+
+
+
+
 **For GRC poster and presentation:**
 
 ```{r}
@@ -524,6 +547,22 @@ anova(greenfitmod2)
 AIC(greenfitmod1, greenfitmod2)
 ```
 Indistinguishable! Fun! 
+
+
+Let's try with a polynomial fit instead
+
+```{r}
+greenfitmodpoly1 <- lm(rel.fitness ~ tot.area + I(tot.area^2) + type + tot.area:type, data = gfitness)
+
+anova(greenfitmodpoly1)
+```
+
+```{r}
+anova(greenfitmod1, greenfitmodpoly1)
+```
+```{r}
+AIC(greenfitmod1, greenfitmodpoly1)
+```
 
 
 With column: 
