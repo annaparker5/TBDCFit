@@ -515,8 +515,8 @@ GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), data = gfitness) +
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
-  scale_shape_manual(values = c(1, 16)) + 
-  scale_linetype_manual(values = c("dashed", "solid")) + 
+  scale_shape_manual(values = c(19, 5)) + 
+  scale_linetype_manual(values = c("solid", "dotdash")) + 
    geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
 
 GRCfitnessplot
