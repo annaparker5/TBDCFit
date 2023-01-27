@@ -463,6 +463,17 @@ Get into one dataset
 ffitnesssubset <- merge(farea, fseedoutsubset, by.x = c("PID", "treatment", "type", "column"), by.y = c("pid", "treatment", "type", "column"))
 ```
 
+**Fitness recalculations**
+
+```{r}
+ffitnesssubset$rel.fitness <- 0
+
+ffitnesssubset[ffitnesssubset$type == "DC", 11] <- (ffitnesssubset[ffitnesssubset$type == "DC", 10]) / (mean(ffitnesssubset[ffitnesssubset$treatment == "CON" & ffitnesssubset$type == "DC", 10]))
+
+ffitnesssubset[ffitnesssubset$type == "TB", 11] <- (ffitnesssubset[ffitnesssubset$type == "TB", 10]) / (mean(ffitnesssubset[ffitnesssubset$treatment == "CON" & ffitnesssubset$type == "TB", 10]))
+```
+
+
 
 
 ```{r}
@@ -476,38 +487,80 @@ fieldann4 <- data.frame(label = c("C", "D"),
 
 
 ```{r}
-fieldfitnessplotsubset <- ggplot(aes(x = tot.area, y = success), 
-                           data = ffitnesssubset) + 
-  theme_bw() + 
-  geom_smooth(method = "lm", alpha = 0.2, color = "dark gray") +
+fieldfitnessplotsubset <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssubset) + 
+  theme_bw() +
+  xlim(0, 7000) + 
+  ylim(0, 8) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
-  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Fitness", 
-       color = "Expected outcome", shape = "Hostplant") + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
-  facet_wrap(~ type, scales = "free") + 
-  geom_text(data = fieldann4, aes(x = width, y = height, label = label), size = 10, color = "gray50") 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = 6000, y = 7.5, label = "B"), size = 10, color = "gray40")
+  #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
 
 fieldfitnessplotsubset
 ```
 
 save graph: 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4field.png", fieldfitnessplotsubset, width = 8, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4fieldnew.png", fieldfitnessplotsubset, width = 8, height = 5)
 ```
+
+
+
+```{r}
+GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssubset) + 
+  theme_bw() +
+  xlim(0, 7000) + 
+  ylim(0, 8) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
+  scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = 6000, y = 7.5, label = "B"), size = 10, color = "gray40")
+  #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
+
+GRCfitnessplotB
+
+```
+
+save graph: 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCField.png", GRCfitnessplotB, width = 6, height = 5)
+```
+
+
 
 ### Stats
 
 ```{r}
-fmodfitnesssubset <- lmer(success ~ treatment*type + (1|column), data = ffitnesssubset, REML = FALSE)
+fmodfitnesssubset <- lmer(rel.fitness ~ treatment*type + (1|column), data = ffitnesssubset, REML = FALSE)
 
 anova(fmodfitnesssubset)
+```
+```{r}
+fmodfitnesssubset2 <- lm(rel.fitness ~ treatment*type, data = ffitnesssubset)
+
+anova(fmodfitnesssubset2)
 ```
 
 
 
 ```{r}
-fmodfitnesssubset2 <- lmer(success ~ tot.area*type + (1|column), data = ffitnesssubset, REML = FALSE)
+fmodfitnesssubset3 <- lmer(rel.fitness ~ tot.area*type + (1|column), data = ffitnesssubset, REML = FALSE)
 
-anova(fmodfitnesssubset2)
+anova(fmodfitnesssubset3)
 ```
+
+```{r}
+fmodfitnesssubset4 <- lm(rel.fitness ~ tot.area*type, data = ffitnesssubset)
+
+anova(fmodfitnesssubset4)
+```
+

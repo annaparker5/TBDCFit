@@ -500,7 +500,7 @@ GRCfitnessplot
 ```
 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreen.png", GRCfitnessplot, width = 8, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreen.png", GRCfitnessplot, width = 6, height = 5)
 ```
 
 
