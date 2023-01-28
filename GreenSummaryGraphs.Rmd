@@ -494,6 +494,40 @@ greenfitnessplotpoly <- ggplot(aes(x = tot.area, y = rel.fitness),
 greenfitnessplotpoly
 ```
 
+**Try scaling to median instead**
+
+```{r}
+gfitness$rel.fitness.med <- 0
+
+gfitness[gfitness$type == "DC", 10] <- (gfitness[gfitness$type == "DC", 8]) / (median(gfitness[gfitness$treatment == "CON" & gfitness$type == "DC", 8]))
+
+gfitness[gfitness$type == "TB", 10] <- (gfitness[gfitness$type == "TB", 8]) / (mean(gfitness[gfitness$treatment == "CON" & gfitness$type == "TB", 8]))
+```
+
+
+```{r}
+greenfitnessplotmed <- ggplot(aes(x = tot.area, y = rel.fitness.med), 
+                           data = gfitness) + 
+  theme_bw() +
+  xlim(0, 8000) + 
+  ylim(0, 4.5) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = 7000, y = 4.25, label = "A"), size = 10, color = "gray40")
+  #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
+
+greenfitnessplotmed
+```
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greenmedian.png", greenfitnessplotmed, width = 6, height = 5)
+```
+
 
 
 
@@ -506,10 +540,10 @@ greenfitnessplotpoly
 
 
 ```{r}
-GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), data = gfitness) + 
+GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness.med), data = gfitness) + 
   theme_bw() +
   xlim(0, 8000) + 
-  ylim(0, 3) + 
+  ylim(0, 4.5) + 
   geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
@@ -517,13 +551,13 @@ GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), data = gfitness) +
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
   scale_shape_manual(values = c(19, 5)) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
-   geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
+   geom_text(aes(x = 7000, y = 4.25, label = "A"), size = 10, color = "gray40")
 
 GRCfitnessplot
 ```
 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreen.png", GRCfitnessplot, width = 6, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreenmedian.png", GRCfitnessplot, width = 6, height = 5)
 ```
 
 
@@ -535,7 +569,11 @@ greenfitmod1 <- lm(rel.fitness ~ tot.area*type, data = gfitness)
 
 anova(greenfitmod1)
 ```
+```{r}
+greenfitmod1med <- lm(rel.fitness.med ~ tot.area*type, data = gfitness)
 
+anova(greenfitmod1med)
+```
 
 ```{r}
 greenfitmod2 <- lm(rel.fitness ~ treatment*type, data = gfitness)
