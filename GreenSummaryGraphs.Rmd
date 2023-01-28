@@ -501,7 +501,7 @@ gfitness$rel.fitness.med <- 0
 
 gfitness[gfitness$type == "DC", 10] <- (gfitness[gfitness$type == "DC", 8]) / (median(gfitness[gfitness$treatment == "CON" & gfitness$type == "DC", 8]))
 
-gfitness[gfitness$type == "TB", 10] <- (gfitness[gfitness$type == "TB", 8]) / (mean(gfitness[gfitness$treatment == "CON" & gfitness$type == "TB", 8]))
+gfitness[gfitness$type == "TB", 10] <- (gfitness[gfitness$type == "TB", 8]) / (median(gfitness[gfitness$treatment == "CON" & gfitness$type == "TB", 8]))
 ```
 
 
