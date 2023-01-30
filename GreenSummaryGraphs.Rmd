@@ -221,6 +221,10 @@ greenflowerplotnew <- ggplot(aes(x = treatment, shape = type, group = type),
 greenflowerplotnew
 ```
 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigIntA.png", greenflowerplotnew, width = 8, height = 5)
+```
+
 
 ### Run model
 
@@ -308,6 +312,9 @@ greenpodsplotnew <- ggplot(aes(x = treatment, shape = type, group = type),
 greenpodsplotnew
 ```
 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigIntB.png", greenpodsplotnew, width = 8, height = 5)
+```
 
 
 ### Run model
@@ -493,6 +500,10 @@ greenseedplotnew <- ggplot(aes(x = treatment, shape = type, group = type),
 greenseedplotnew
 ```
 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigIntC.png", greenseedplotnew, width = 8, height = 5)
+```
+
 
 ### Run model
 
@@ -564,6 +575,10 @@ greengermplotnew <- ggplot(aes(x = treatment, y = prop.sprouted, shape = type, g
   theme(legend.position = "none")
 
 greengermplotnew
+```
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigIntD.png", greengermplotnew, width = 8, height = 5)
 ```
 
 
