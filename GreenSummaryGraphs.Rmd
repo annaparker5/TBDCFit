@@ -20,6 +20,7 @@ Roadmap:
 library(tidyverse)
 library(ggplot2)
 library(lmerTest)
+library(Rmisc)
 ```
 
 
@@ -82,6 +83,37 @@ greenconsumpplot
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig3green.png", greenconsumpplot, width = 8, height = 5)
 ```
+
+
+**TRYING NEW PLOT IDEA 1/30**
+
+```{r}
+greenconsumpsum <- summarySE(data = garea, measurevar = "tot.area", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+```{r}
+greenconsumpplotnew <- ggplot(aes(x = treatment, y = tot.area, shape = type, group = type), 
+                           data = greenconsumpsum) + 
+  theme_bw() + 
+  geom_point(size = 3) + 
+  geom_line(aes(linetype = type)) + 
+  geom_errorbar(aes(ymin = tot.area - se, ymax = tot.area + se), width = 0.3)+ 
+  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  scale_y_continuous(expression(paste("Devil's claw leaf area consumed ", (cm^{2}))), 
+                     sec.axis = sec_axis(~ . * 1, 
+                                         name = expression(paste("Tobacco leaf area consumed ", (cm^{2}))))) + 
+  #geom_text(aes(x = "CON", y = 6000, label = "A"), size = 10, color = "gray40") + 
+  theme(legend.position = c(.2, .6))
+
+greenconsumpplotnew
+```
+
+
 
 ### Run stats
 
@@ -157,6 +189,39 @@ greenflowerplot
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1ABgreen.png", greenflowerplot, width = 8, height = 5)
 ```
 
+**NEW GRAPH**
+
+```{r}
+gflowersum <- summarySE(data = gflowers, measurevar = "tot.flowers", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+greenflowerplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = gflowersum[gflowersum$type == "DC", ]) + 
+  theme_bw() + 
+  geom_point(aes(y = tot.flowers), size = 3) + 
+  geom_line(aes(y = tot.flowers, linetype = type)) + 
+  geom_errorbar(aes(ymin = tot.flowers - se, ymax = tot.flowers + se), width = 0.3)+ 
+  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Devil's claw flowers produced", limits = c(0, 45), 
+                     sec.axis = sec_axis(~ . * 4, name = "Tobacco flowers produced")) + 
+  geom_point(aes(y = tot.flowers/4), data = gflowersum[gflowersum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = tot.flowers/4, linetype = type), data = gflowersum[gflowersum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (tot.flowers/4 - se/4), ymax = (tot.flowers/4 + se/4)), width = 0.3, 
+                data = gflowersum[gflowersum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 40, label = "A"), size = 10, color = "gray40") + 
+  theme(legend.position = c(0.2, 0.2))
+
+greenflowerplotnew
+```
+
+
 ### Run model
 
 ```{r}
@@ -210,6 +275,40 @@ greenpodsplot
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1CDgreen.png", greenpodsplot, width = 8, height = 5)
 ```
+
+**NEW GRAPH**
+
+```{r}
+gpodssum <- summarySE(data = gpods, measurevar = "num.pods.m", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+greenpodsplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = gpodssum[gpodssum$type == "DC", ]) + 
+  theme_bw() + 
+  geom_point(aes(y = num.pods.m), size = 3) + 
+  geom_line(aes(y = num.pods.m, linetype = type)) + 
+  geom_errorbar(aes(ymin = num.pods.m - se, ymax = num.pods.m + se), width = 0.3)+ 
+  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Devil's claw mature pods produced", limits = c(0, 9), 
+                     sec.axis = sec_axis(~ . * 12, name = "Tobacco mature pods produced")) + 
+  geom_point(aes(y = num.pods.m/12), data = gpodssum[gpodssum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = num.pods.m/12, linetype = type), data = gpodssum[gpodssum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (num.pods.m/12 - se/12), ymax = (num.pods.m/12 + se/12)), width = 0.3, 
+                data = gpodssum[gpodssum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 8, label = "B"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+greenpodsplotnew
+```
+
+
 
 ### Run model
 
@@ -363,6 +462,37 @@ greenseedplot
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1EFgreen.png", greenseedplot, width = 8, height = 5)
 ```
 
+**NEW PLOT**
+```{r}
+gseedssum <- summarySE(data = gseedout, measurevar = "seed.tot", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+greenseedplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = gseedssum[gseedssum$type == "DC", ]) + 
+  theme_bw() + 
+  geom_point(aes(y = seed.tot), size = 3) + 
+  geom_line(aes(y = seed.tot, linetype = type)) + 
+  geom_errorbar(aes(ymin = seed.tot - se, ymax = seed.tot + se), width = 0.3)+ 
+  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Devil's claw seed set", limits = c(0, 225), 
+                     sec.axis = sec_axis(~ . / 10, name = "Tobacco seed set")) + 
+  geom_point(aes(y = seed.tot * 10), data = gseedssum[gseedssum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = seed.tot * 10, linetype = type), data = gseedssum[gseedssum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (seed.tot * 10 - se * 10), ymax = (seed.tot * 10 + se * 10)), width = 0.3, 
+                data = gseedssum[gseedssum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 200, label = "C"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+greenseedplotnew
+```
+
 
 ### Run model
 
@@ -406,6 +536,34 @@ greengermplot
 
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS1GHgreen.png", greengermplot, width = 8, height = 5)
+```
+
+**NEW PLOT**
+
+```{r}
+ggermsum <- summarySE(data = gseedout, measurevar = "prop.sprouted", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+```{r}
+greengermplotnew <- ggplot(aes(x = treatment, y = prop.sprouted, shape = type, group = type), 
+                           data = ggermsum) + 
+  theme_bw() + 
+  geom_point(size = 3) + 
+  geom_line(aes(linetype = type)) + 
+  geom_errorbar(aes(ymin = prop.sprouted - se, ymax = prop.sprouted + se), width = 0.3)+ 
+  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  scale_y_continuous("Devil's claw germination success", limits = c(0, 1), 
+                     sec.axis = sec_axis(~ . * 1, 
+                                         name = "Tobacco germination success")) + 
+  geom_text(aes(x = "WOWE", y = .95, label = "D"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+greengermplotnew
 ```
 
 
