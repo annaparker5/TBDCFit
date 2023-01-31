@@ -713,24 +713,25 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greenmedian.png", greenfitnessplotm
 
 
 ```{r}
-GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness.med), data = gfitness) + 
+GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), data = gfitness) + 
   theme_bw() +
   xlim(0, 8000) + 
-  ylim(0, 4.5) + 
-  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
+  ylim(0, 3) + 
+  geom_smooth(aes(linetype = type), method = "lm", se = FALSE, alpha = 0.4, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
   scale_shape_manual(values = c(19, 5)) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
-   geom_text(aes(x = 7000, y = 4.25, label = "A"), size = 10, color = "gray40")
+  geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40") + 
+  theme(legend.position = "top")
 
 GRCfitnessplot
 ```
 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreenmedian.png", GRCfitnessplot, width = 6, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreennoCI.png", GRCfitnessplot, width = 8, height = 5)
 ```
 
 
