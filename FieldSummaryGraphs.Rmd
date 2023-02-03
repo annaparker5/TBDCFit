@@ -548,7 +548,7 @@ GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssub
   theme_bw() +
   xlim(0, 6500) + 
   #ylim(0, 8) + 
-  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.4, color = "dark gray") +
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
