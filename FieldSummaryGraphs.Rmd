@@ -498,14 +498,16 @@ fieldann4 <- data.frame(label = c("C", "D"),
 fieldfitnessplotsubset <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssubset) + 
   theme_bw() +
   xlim(0, 7000) + 
-  ylim(0, 8) + 
+  #ylim(0, 8) + 
   geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
-  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
   scale_linetype_manual(values = c("dashed", "solid")) + 
+  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
   geom_text(aes(x = 6000, y = 7.5, label = "B"), size = 10, color = "gray40")
   #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
 
@@ -514,7 +516,7 @@ fieldfitnessplotsubset
 
 save graph: 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4fieldnew.png", fieldfitnessplotsubset, width = 8, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4fieldnew.png", fieldfitnessplotsubset, width = 8, height = 8)
 ```
 
 ```{r}
@@ -544,16 +546,18 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4fieldmedian.png", fieldfitnessplots
 ```{r}
 GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssubset) + 
   theme_bw() +
-  xlim(0, 7000) + 
-  ylim(0, 8) + 
-  geom_smooth(aes(linetype = type), method = "lm", se = FALSE, alpha = 0.4, color = "dark gray") +
-  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  xlim(0, 6500) + 
+  #ylim(0, 8) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.4, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
   scale_shape_manual(values = c(19, 5)) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
-  geom_text(aes(x = 6000, y = 7.25, label = "B"), size = 10, color = "gray40") + 
+  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
+  geom_text(aes(x = 5500, y = 7.25, label = "Field"), size = 10, color = "gray40") + 
   theme(legend.position = "none")
 
 GRCfitnessplotB
@@ -562,7 +566,7 @@ GRCfitnessplotB
 
 save graph: 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCFieldnoCI.png", GRCfitnessplotB, width = 8, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCFieldCI.png", GRCfitnessplotB, width = 8, height = 8)
 ```
 
 
@@ -584,7 +588,7 @@ anova(fmodfitnesssubset1med)
 
 
 ```{r}
-fmodfitnesssubset2 <- lm(rel.fitness ~ treatment*type, data = ffitnesssubset)
+fmodfitnesssubset2 <- lm(log(rel.fitness + 0.01) ~ tot.area*type, data = ffitnesssubset)
 
 anova(fmodfitnesssubset2)
 ```

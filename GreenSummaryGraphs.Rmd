@@ -629,7 +629,34 @@ greenfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness),
                            data = gfitness) + 
   theme_bw() +
   xlim(0, 8000) + 
-  ylim(0, 3) + 
+  #ylim(0, 3) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
+  labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
+       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
+  scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
+  geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
+  #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
+
+greenfitnessplot
+```
+
+save plot: 
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew.png", greenfitnessplot, width = 8, height = 8)
+```
+
+
+```{r}
+greenfitnessplotlog <- ggplot(aes(x = tot.area, y = log(rel.fitness + 0.01)), 
+                           data = gfitness) + 
+  theme_bw() +
+  xlim(0, 8000) + 
+  #ylim(0, 3) + 
   geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
@@ -640,13 +667,12 @@ greenfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness),
   geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
   #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
 
-greenfitnessplot
+greenfitnessplotlog
 ```
 
-save plot: 
-```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew.png", greenfitnessplot, width = 8, height = 5)
-```
+
+
+
 
 ```{r}
 greenfitnessplotpoly <- ggplot(aes(x = tot.area, y = rel.fitness), 
@@ -716,22 +742,24 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greenmedian.png", greenfitnessplotm
 GRCfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness), data = gfitness) + 
   theme_bw() +
   xlim(0, 8000) + 
-  ylim(0, 3) + 
-  geom_smooth(aes(linetype = type), method = "lm", se = FALSE, alpha = 0.4, color = "dark gray") +
-  geom_point(aes(color = treatment, shape = type), alpha = 0.8) + 
+  #ylim(0, 3) + 
+  geom_smooth(aes(linetype = type), method = "lm", alpha = 0.4, color = "dark gray") +
+  geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
        color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
   scale_shape_manual(values = c(19, 5)) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
-  geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40") + 
-  theme(legend.position = "top")
+  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
+        legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
+  #geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40") + 
+  theme(legend.position = c(0.8, 0.8))
 
 GRCfitnessplot
 ```
 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreennoCI.png", GRCfitnessplot, width = 8, height = 5)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCGreenCI.png", GRCfitnessplot, width = 8, height = 8)
 ```
 
 
@@ -743,6 +771,17 @@ greenfitmod1 <- lm(rel.fitness ~ tot.area*type, data = gfitness)
 
 anova(greenfitmod1)
 ```
+
+```{r}
+greenfitmodlog <- lm(log(rel.fitness + 0.01) ~ tot.area*type, data = gfitness)
+
+anova(greenfitmodlog)
+```
+
+
+
+
+
 ```{r}
 greenfitmod1med <- lm(rel.fitness.med ~ tot.area*type, data = gfitness)
 
