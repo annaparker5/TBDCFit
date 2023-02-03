@@ -555,9 +555,9 @@ GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssub
   scale_color_manual(values = c("#1E88E5", "lime green", "#FFA502", "#D81B60")) + 
   scale_shape_manual(values = c(19, 5)) + 
   scale_linetype_manual(values = c("solid", "dotdash")) + 
-  theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
+  theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), 
         legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
-  geom_text(aes(x = 2000, y = 7.25, label = "Field"), size = 10, color = "gray40") + 
+  geom_text(aes(x = 2000, y = 7.5, label = "Field"), size = 12, color = "gray40") + 
   theme(legend.position = "none")
 
 GRCfitnessplotB
