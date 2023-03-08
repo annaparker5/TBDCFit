@@ -547,7 +547,7 @@ ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4fieldmedian.png", fieldfitnessplots
 GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssubset) + 
   theme_bw() +
   xlim(0, 6500) + 
-  #ylim(0, 8) + 
+  #ylim(-1, 4) + 
   geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
@@ -557,7 +557,7 @@ GRCfitnessplotB <- ggplot(aes(x = tot.area, y = rel.fitness), data = ffitnesssub
   scale_linetype_manual(values = c("solid", "dotdash")) + 
   theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), 
         legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
-  geom_text(aes(x = 2000, y = 7.5, label = "Field"), size = 12, color = "gray40") + 
+  geom_text(aes(x = 2000, y = 3.5, label = "Field"), size = 12, color = "gray40") + 
   theme(legend.position = "none")
 
 GRCfitnessplotB
@@ -566,7 +566,7 @@ GRCfitnessplotB
 
 save graph: 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCFieldCI.png", GRCfitnessplotB, width = 8, height = 8)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/GRCFieldposterCI.png", GRCfitnessplotB, width = 8, height = 16)
 ```
 
 

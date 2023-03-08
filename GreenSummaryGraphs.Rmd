@@ -67,7 +67,7 @@ greenconsumpplot <- ggplot(aes(x = treatment, y = tot.area, color = treatment, s
   theme_bw() + 
   geom_boxplot() + 
   #geom_point(alpha = 0.5, position = position_jitter(width = .2, height = 0)) + 
-  labs(x = "Expected outcome", y = expression(paste("Total leaf area consumed ", (cm^{2})))
+  labs(x = "Experimental group", y = expression(paste("Total leaf area consumed ", (cm^{2})))
        ) + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   #scale_shape_manual(values = c(1, 16)) + 
@@ -202,13 +202,14 @@ gflowersum <- summarySE(data = gflowers, measurevar = "tot.flowers",
 greenflowerplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
                            data = gflowersum[gflowersum$type == "DC", ]) + 
   theme_bw() + 
+  theme(text = element_text(size = 15)) + 
   geom_point(aes(y = tot.flowers), size = 3) + 
   geom_line(aes(y = tot.flowers, linetype = type)) + 
   geom_errorbar(aes(ymin = tot.flowers - se, ymax = tot.flowers + se), width = 0.3)+ 
-  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+  labs(x = " ", shape = "Hostplant type", group = "Hostplant type", 
        linetype = "Hostplant type") + 
-  scale_y_continuous("Devil's claw flowers produced", limits = c(0, 45), 
-                     sec.axis = sec_axis(~ . * 4, name = "Tobacco flowers produced")) + 
+  scale_y_continuous("Flowers produced", limits = c(0, 45), 
+                     sec.axis = sec_axis(~ . * 4, name = "Flowers produced")) + 
   geom_point(aes(y = tot.flowers/4), data = gflowersum[gflowersum$type == "TB", ], size = 3) + 
   geom_line(aes(y = tot.flowers/4, linetype = type), data = gflowersum[gflowersum$type == "TB", ]) +
   geom_errorbar(aes(ymin = (tot.flowers/4 - se/4), ymax = (tot.flowers/4 + se/4)), width = 0.3, 
@@ -293,13 +294,14 @@ gpodssum <- summarySE(data = gpods, measurevar = "num.pods.m",
 greenpodsplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
                            data = gpodssum[gpodssum$type == "DC", ]) + 
   theme_bw() + 
+  theme(text = element_text(size = 15)) + 
   geom_point(aes(y = num.pods.m), size = 3) + 
   geom_line(aes(y = num.pods.m, linetype = type)) + 
   geom_errorbar(aes(ymin = num.pods.m - se, ymax = num.pods.m + se), width = 0.3)+ 
-  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+  labs(x = "", shape = "Hostplant type", group = "Hostplant type", 
        linetype = "Hostplant type") + 
-  scale_y_continuous("Devil's claw mature pods produced", limits = c(0, 9), 
-                     sec.axis = sec_axis(~ . * 12, name = "Tobacco mature pods produced")) + 
+  scale_y_continuous("Mature pods produced", limits = c(0, 9), 
+                     sec.axis = sec_axis(~ . * 12, name = "Mature pods produced")) + 
   geom_point(aes(y = num.pods.m/12), data = gpodssum[gpodssum$type == "TB", ], size = 3) + 
   geom_line(aes(y = num.pods.m/12, linetype = type), data = gpodssum[gpodssum$type == "TB", ]) +
   geom_errorbar(aes(ymin = (num.pods.m/12 - se/12), ymax = (num.pods.m/12 + se/12)), width = 0.3, 
@@ -481,13 +483,14 @@ gseedssum <- summarySE(data = gseedout, measurevar = "seed.tot",
 greenseedplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
                            data = gseedssum[gseedssum$type == "DC", ]) + 
   theme_bw() + 
+  theme(text = element_text(size = 15)) + 
   geom_point(aes(y = seed.tot), size = 3) + 
   geom_line(aes(y = seed.tot, linetype = type)) + 
   geom_errorbar(aes(ymin = seed.tot - se, ymax = seed.tot + se), width = 0.3)+ 
-  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+  labs(x = "", shape = "Hostplant type", group = "Hostplant type", 
        linetype = "Hostplant type") + 
-  scale_y_continuous("Devil's claw seed set", limits = c(0, 225), 
-                     sec.axis = sec_axis(~ . / 10, name = "Tobacco seed set")) + 
+  scale_y_continuous("Seed set (count)", limits = c(0, 225), 
+                     sec.axis = sec_axis(~ . / 10, name = "Seed set (g)")) + 
   geom_point(aes(y = seed.tot * 10), data = gseedssum[gseedssum$type == "TB", ], size = 3) + 
   geom_line(aes(y = seed.tot * 10, linetype = type), data = gseedssum[gseedssum$type == "TB", ]) +
   geom_errorbar(aes(ymin = (seed.tot * 10 - se * 10), ymax = (seed.tot * 10 + se * 10)), width = 0.3, 
@@ -561,16 +564,17 @@ ggermsum <- summarySE(data = gseedout, measurevar = "prop.sprouted",
 greengermplotnew <- ggplot(aes(x = treatment, y = prop.sprouted, shape = type, group = type), 
                            data = ggermsum) + 
   theme_bw() + 
+  theme(text = element_text(size = 15)) + 
   geom_point(size = 3) + 
   geom_line(aes(linetype = type)) + 
   geom_errorbar(aes(ymin = prop.sprouted - se, ymax = prop.sprouted + se), width = 0.3)+ 
-  labs(x = "Expected outcome", shape = "Hostplant type", group = "Hostplant type", 
+  labs(x = "Experimental group", shape = "Hostplant type", group = "Hostplant type", 
        linetype = "Hostplant type") + 
   scale_shape_manual(values = c(1, 16)) + 
   scale_linetype_manual(values = c("dashed", "solid")) + 
-  scale_y_continuous("Devil's claw germination success", limits = c(0, 1), 
+  scale_y_continuous("Proportion of seeds sprouted", limits = c(0, 1), 
                      sec.axis = sec_axis(~ . * 1, 
-                                         name = "Tobacco germination success")) + 
+                                         name = "Proportion of seeds sprouted")) + 
   geom_text(aes(x = "WOWE", y = .95, label = "D"), size = 10, color = "gray40") + 
   theme(legend.position = "none")
 
