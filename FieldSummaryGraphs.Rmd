@@ -21,6 +21,7 @@ library(tidyverse)
 library(ggplot2)
 #library(nlme)
 library(lmerTest)
+library(Rmisc)
 ```
 
 ```{r}
@@ -183,12 +184,52 @@ fieldflowerplotsubset <- ggplot(aes(x = treatment, y = tot.flowers, color = trea
 fieldflowerplotsubset
 ```
 
+**NEW GRAPH**
+
+```{r}
+fflowersum <- summarySE(data = fflowerssubset, measurevar = "tot.flowers", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+fieldflowerplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = fflowersum[fflowersum$type == "DC", ]) + 
+  theme_bw() + 
+  theme(text = element_text(size = 15)) + 
+  geom_point(aes(y = tot.flowers), size = 3) + 
+  geom_line(aes(y = tot.flowers, linetype = type)) + 
+  geom_errorbar(aes(ymin = tot.flowers - se, ymax = tot.flowers + se), width = 0.3)+ 
+  labs(x = " ", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Flowers produced", limits = c(0, 60), 
+                     sec.axis = sec_axis(~ . * 2, name = "Flowers produced")) + 
+  geom_point(aes(y = tot.flowers/2), data = fflowersum[fflowersum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = tot.flowers/2, linetype = type), data = fflowersum[fflowersum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (tot.flowers/2 - se/2), ymax = (tot.flowers/2 + se/2)), width = 0.3, 
+                data = fflowersum[fflowersum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 53, label = "A"), size = 10, color = "gray40") + 
+  theme(legend.position = c(0.4, 0.85))
+
+fieldflowerplotnew
+```
+
+
 
 ### Save graphs
 
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2ABfield.png", fieldflowerplotsubset, width = 8, height = 5)
 ```
+
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2Afieldnew.png", fieldflowerplotnew, width = 8, height = 5)
+```
+
 
 ### Run stats
 
@@ -244,6 +285,46 @@ fieldpodsplotsubset
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2CDfield.png", fieldpodsplotsubset, width = 8, height = 5)
 ```
+
+**NEW GRAPH**
+
+
+```{r}
+fpodssum <- summarySE(data = fpodssubset, measurevar = "num.pod.m", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+fieldpodsplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = fpodssum[fpodssum$type == "DC", ]) + 
+  theme_bw() + 
+  theme(text = element_text(size = 15)) + 
+  geom_point(aes(y = num.pod.m), size = 3) + 
+  geom_line(aes(y = num.pod.m, linetype = type)) + 
+  geom_errorbar(aes(ymin = num.pod.m - se, ymax = num.pod.m + se), width = 0.3)+ 
+  labs(x = "", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Mature pods produced", limits = c(0, 20), 
+                     sec.axis = sec_axis(~ . * 4, name = "Mature pods produced")) + 
+  geom_point(aes(y = num.pod.m/4), data = fpodssum[fpodssum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = num.pod.m/4, linetype = type), data = fpodssum[fpodssum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (num.pod.m/4 - se/4), ymax = (num.pod.m/4 + se/4)), width = 0.3, 
+                data = fpodssum[fpodssum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 18, label = "B"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+fieldpodsplotnew
+```
+
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2Bfieldnew.png", fieldpodsplotnew, width = 8, height = 5)
+```
+
 
 ### Run stats
 
@@ -396,6 +477,45 @@ fieldseedplotsubset
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2EFfield.png", fieldseedplotsubset, width = 8, height = 5)
 ```
 
+**NEW GRAPH**
+
+```{r}
+fseedssum <- summarySE(data = fseedoutsubset, measurevar = "seed.tot", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+
+```{r}
+fieldseedplotnew <- ggplot(aes(x = treatment, shape = type, group = type), 
+                           data = fseedssum[fseedssum$type == "DC", ]) + 
+  theme_bw() + 
+  theme(text = element_text(size = 15)) + 
+  geom_point(aes(y = seed.tot), size = 3) + 
+  geom_line(aes(y = seed.tot, linetype = type)) + 
+  geom_errorbar(aes(ymin = seed.tot - se, ymax = seed.tot + se), width = 0.3)+ 
+  labs(x = "", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_y_continuous("Seed set (count)", limits = c(0, 1300), 
+                     sec.axis = sec_axis(~ . / 100, name = "Seed set (g)")) + 
+  geom_point(aes(y = seed.tot * 100), data = fseedssum[fseedssum$type == "TB", ], size = 3) + 
+  geom_line(aes(y = seed.tot * 100, linetype = type), data = fseedssum[fseedssum$type == "TB", ]) +
+  geom_errorbar(aes(ymin = (seed.tot * 100 - se * 100), ymax = (seed.tot * 100 + se * 100)), width = 0.3, 
+                data = fseedssum[fseedssum$type == "TB", ]) + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  geom_text(aes(x = "WOWE", y = 1100, label = "C"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+fieldseedplotnew
+```
+
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2Cfield.png", fieldseedplotnew, width = 8, height = 5)
+```
+
+
 
 ### Run stats
 
@@ -436,6 +556,43 @@ fieldgermplotsubset
 
 ```{r}
 ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2GHfield.png", fieldgermplotsubset, width = 8, height = 5)
+```
+
+**NEW GRAPH**
+
+
+```{r}
+fseedoutgerm <- fseedoutsubset[complete.cases(fseedoutsubset) == TRUE, ]
+
+fgermsum <- summarySE(data = fseedoutgerm, measurevar = "prop.sprouted", 
+                              groupvars = c("treatment", "type"))
+```
+
+
+```{r}
+fieldgermplotnew <- ggplot(aes(x = treatment, y = prop.sprouted, shape = type, group = type), 
+                           data = fgermsum) + 
+  theme_bw() + 
+  theme(text = element_text(size = 15)) + 
+  geom_point(size = 3) + 
+  geom_line(aes(linetype = type)) + 
+  geom_errorbar(aes(ymin = prop.sprouted - se, ymax = prop.sprouted + se), width = 0.3)+ 
+  labs(x = "Experimental group", shape = "Hostplant type", group = "Hostplant type", 
+       linetype = "Hostplant type") + 
+  scale_shape_manual(values = c(1, 16)) + 
+  scale_linetype_manual(values = c("dashed", "solid")) + 
+  scale_y_continuous("Proportion of seeds sprouted", limits = c(0, 1), 
+                     sec.axis = sec_axis(~ . * 1, 
+                                         name = "Proportion of seeds sprouted")) + 
+  geom_text(aes(x = "WOWE", y = .90, label = "D"), size = 10, color = "gray40") + 
+  theme(legend.position = "none")
+
+fieldgermplotnew
+```
+
+
+```{r}
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/FigS2Dfield.png", fieldgermplotnew, width = 8, height = 5)
 ```
 
 
