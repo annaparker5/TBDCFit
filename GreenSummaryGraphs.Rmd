@@ -637,13 +637,13 @@ greenfitnessplot <- ggplot(aes(x = tot.area, y = rel.fitness),
   geom_smooth(aes(linetype = type), method = "lm", alpha = 0.2, color = "dark gray") +
   geom_point(aes(color = treatment, shape = type), alpha = 0.8, size = 2) + 
   labs(x = expression(paste("Total leaf area consumed ", (cm^{2}))), y = "Relative fitness", 
-       color = "Expected outcome", shape = "Hostplant", linetype = "Hostplant") + 
+       color = "Experimental group", shape = "Host plant", linetype = "Host plant") + 
   scale_color_manual(values = c("black", "#1E88E5", "lime green", "#D81B60")) + 
   scale_shape_manual(values = c(1, 16)) + 
   scale_linetype_manual(values = c("dashed", "solid")) + 
   theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14), 
-        legend.text = element_text(size = 12), legend.title = element_text(size = 14)) + 
-  geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
+        legend.text = element_text(size = 12), legend.title = element_text(size = 14))  
+  #geom_text(aes(x = 7000, y = 2.75, label = "A"), size = 10, color = "gray40")
   #scale_y_continuous(limits=c(0,4.5), oob = scales::squish(x = , range = c(0, 4.5)))
 
 greenfitnessplot
@@ -651,7 +651,8 @@ greenfitnessplot
 
 save plot: 
 ```{r}
-ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew.png", greenfitnessplot, width = 8, height = 8)
+#ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew.png", greenfitnessplot, width = 8, height = 8)
+ggsave("~/Desktop/GitHub/TBDCFit/Figures/Fig4greennew2024.png", greenfitnessplot, width = 8, height = 5)
 ```
 
 
